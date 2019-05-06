@@ -1,6 +1,3 @@
-# aws-eks-rds-terraform
-
-```yaml
 ##########################################################################################
 # AWS Vars
 AWS_region                     = "us-west-2"
@@ -36,4 +33,3 @@ AWS_rds_instance_class         = "db.m4.xlarge"
 AWS_rds_username               = "postgres"
 AWS_rds_password               = "postgres@123"
 AWS_rds_parameter_group_family = "postgres9.6"
-```
