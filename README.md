@@ -56,6 +56,8 @@ $ aws s3api put-bucket-versioning --bucket <YOUR_BUCKET_NAME> --versioning-confi
 
  **Create EKS Cluster**
 1.  Configure ***(terraform.tfvars)*** as per your requirements:
+
+
 ```
 $ nano terraform.tfvars
 
