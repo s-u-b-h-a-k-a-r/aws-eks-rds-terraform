@@ -58,7 +58,7 @@ $ aws s3api put-bucket-versioning --bucket <YOUR_BUCKET_NAME> --versioning-confi
 1.  Configure ***(terraform.tfvars)*** as per your requirements:
 
 
-```
+	```
 	$ nano terraform.tfvars
 
 	##########################################################################################
@@ -93,7 +93,7 @@ $ aws s3api put-bucket-versioning --bucket <YOUR_BUCKET_NAME> --versioning-confi
 	AWS_rds_username               = "postgres"
 	AWS_rds_password               = "postgres123"
 	AWS_rds_parameter_group_family = "postgres9.6"
-```
+      ```
 
 2.  Initialize and pull terraform cloud specific dependencies:
 ```
