@@ -111,6 +111,8 @@ $ terraform plan
 ```
 $ terraform apply
 ```
+
+
 ```
 Terraform modules will create
 
@@ -123,7 +125,9 @@ Terraform modules will create
 -   Autoscaling Group will create nodes to be added to the cluster
 -   Security group for RDS
 -   RDS with PostgreSQL
+
 ```
+
 
 **Configure kubectl to allow us to connect to EKS cluster**
 ```
