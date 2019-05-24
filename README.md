@@ -153,7 +153,6 @@ $ kubectl --namespace kube-system create serviceaccount tiller
 $ kubectl create clusterrolebinding tiller --clusterrole cluster-admin --serviceaccount=kube-system:tiller
 $ helm init --service-account tiller --upgrade
 ```
-
 [![asciicast](https://asciinema.org/a/248153.png)](https://asciinema.org/a/248153)
 
 <a id="access_dashboard"></a>
