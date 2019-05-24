@@ -67,17 +67,17 @@ AWS_vpc_subnet                 = "172.16.0.0/16"
 AWS_azs                        = ["us-west-2a", "us-west-2b"]
 AWS_public_subnets             = ["172.16.0.0/20", "172.16.16.0/20"]
 AWS_tags                       = 
-							    { 
-							        "Environment"          = "Testing"
-							    }
+				 { 
+				      "Environment"          = "Testing"
+				 }
 EKS_name                       = "eks-terra-cloud"
 EKS_worker_groups              = [{ 
-							        "instance_type"        = "m4.xlarge"
-							        "asg_desired_capacity" = "5",
-							        "asg_min_size"         = "5",
-							        "asg_max_size"         = "7",
-							        "key_name"             = "subhakarkotta"
-							    }]
+				       "instance_type"        = "m4.xlarge"
+				       "asg_desired_capacity" = "5",
+				       "asg_min_size"         = "5",
+				       "asg_max_size"         = "7",
+				       "key_name"             = "subhakarkotta"
+				}]
 ########################################################################################
 # AWS RDS Vars
 AWS_rds_name                   = "dev"
