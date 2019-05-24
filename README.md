@@ -173,11 +173,6 @@ Start proxy to access kubernetes dashboard
 ***Click !***
 [http://localhost:8001/api/v1/namespaces/kube-system/services/https:kubernetes-dashboard:/proxy/#!/login](http://localhost:8001/api/v1/namespaces/kube-system/services/https:kubernetes-dashboard:/proxy/#!/login)
 
-![enter image description here](https://lh3.googleusercontent.com/bH5dzB7TtZ4AvURZz-841VHMsaMuC4vo9Jax0G7XID0XazoDpHcA3TA_SDKQEpXqL9-PupbXeElSKQ "EKS Kubernetes Dashboard")
-
-***[![Watch the video]](https://youtu.be/vdT_ZVAEXok)***
-
-
 
 <a id="aks"></a>
 
