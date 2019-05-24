@@ -159,8 +159,6 @@ $ helm init --service-account tiller --upgrade
 
 # Access Kubernetes Dashboard
 
-
-
 From ***local*** system execute the below commands
 * `$ ssh -L 8001:localhost:8001 root@100.10.10.108` [***password : aws-eks***]
 
@@ -173,10 +171,6 @@ Start proxy to access kubernetes dashboard
 ***Click !***
 [http://localhost:8001/api/v1/namespaces/kube-system/services/https:kubernetes-dashboard:/proxy/#!/login](http://localhost:8001/api/v1/namespaces/kube-system/services/https:kubernetes-dashboard:/proxy/#!/login)
 
-
-<a id="aks"></a>
-
-**[Access Kubernetes Dashboard](#access_dashboard) by following the steps given in the link**
 
 <a id="delete_cluster"></a>
 
