@@ -8,7 +8,6 @@ AWS_public_subnets             = ["172.16.0.0/20", "172.16.16.0/20"]
 AWS_tags                       = 
     { 
         "Environment"          = "Testing"
-        "Owner"                = "subhakarkotta"
     }
 EKS_name                       = "eks-terra-cloud"
 EKS_worker_groups              = [
