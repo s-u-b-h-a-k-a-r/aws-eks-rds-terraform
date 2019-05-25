@@ -176,7 +176,7 @@ Start proxy to access kubernetes dashboard
 
 # Delete EKS Cluster
 
-**### Destroy all terraform created infrastructure**
+**Destroy all terraform created infrastructure**
 ```
 $ terraform destroy -auto-approve
 ```
