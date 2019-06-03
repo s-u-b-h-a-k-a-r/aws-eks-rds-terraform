@@ -5,10 +5,7 @@ AWS_vpc_name                   = "eks-terra-cloud"
 AWS_vpc_subnet                 = "172.16.0.0/16"
 AWS_azs                        = ["us-west-2a", "us-west-2b"]
 AWS_public_subnets             = ["172.16.0.0/20", "172.16.16.0/20"]
-AWS_tags                       = 
-    { 
-        "Environment"          = "Testing"
-    }
+AWS_tags                       = { "Environment" = "Testing" }
 EKS_name                       = "eks-terra-cloud"
 EKS_worker_groups              = [
     { 
