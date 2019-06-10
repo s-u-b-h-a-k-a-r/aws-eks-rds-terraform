@@ -1,10 +1,12 @@
 pipeline {
-    agent any
+   agent { label 'master' }
 
    environment {
-       GROOVY_HOME = tool name: 'Terraform', type: 'com.cloudbees.jenkins.plugins.customtools.CustomTool'
+       TERRAFORM_HOME = tool name: 'Terraform', type: 'com.cloudbees.jenkins.plugins.customtools.CustomTool'
     }   
     options {
+        disableConcurrentBuilds()
+        timeout(time: 1, unit: 'HOURS')
         ansiColor('xterm')
     }
     parameters {
@@ -16,37 +18,54 @@ pipeline {
             choices: ['master' , 'dev' , 'qa', 'staging'],
             description: 'Choose branch to build and deploy',
             name: 'branch')
+        string(name: 'bucket', defaultValue : 'subhakar-state-bucket', description: "Bucket name to store the tfstate file")
+        string(name: 'region', defaultValue : 'us-west-2', description: "Region name where the bucket resides")
+        string(name: 'cluster', defaultValue : 'demo-cloud', description: "EKS Cluster name")
+        text(name: 'parameters', defaultValue : 'Please check the input https://github.com/SubhakarKotta/aws-eks-rds-terraform/blob/master/provisioning/terraform.tfvars', description: "EKS Cluster name")
     }
     
-    stages {
+     stages {
+
+         stage('Setup') {
+             steps {
+                script {
+                    currentBuild.displayName = "#" + env.BUILD_NUMBER + " " + params.action + " - eks -" + params.cluster
+                }
+            }
+        }
+
         stage('Git Checkout'){
-           steps {
-		      git url: 'https://github.com/SubhakarKotta/aws-eks-rds-terraform',branch: "${params.branch}"
+            steps {
+		      git url: 'https://github.com/SubhakarKotta/aws-eks-rds-terraform',branch: "${branch}"
           }
 	    }
 
+         
         stage('init') {
             steps {
-                  dir ("/var/jenkins_home/workspace/myjenkins/provisioning/") {
-                        sh '${GROOVY_HOME}/terraform version'
-                        sh '${GROOVY_HOME}/terraform init -backend-config="bucket=${CLUSTER_NAME}-tfstate" -backend-config="key=${CLUSTER_NAME}/terraform.tfstate" -backend-config="region=${REGION_NAME}"'
-                  }     
-            } 
+                    withCredentials([[$class: 'AmazonWebServicesCredentialsBinding',credentialsId: 'awsCredentials',accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY' ]]) {
+                    wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']) {
+                        dir ("provisioning") { 
+                            writeFile file: "${cluster}-terraform.tfvars", text: "${parameters}"
+                            sh '${TERRAFORM_HOME}/terraform version'
+                            sh '${TERRAFORM_HOME}/terraform init -backend-config="bucket=${bucket}" -backend-config="key=${cluster}/terraform.tfstate" -backend-config="region=${region}"'
+                            sh '${TERRAFORM_HOME}/terraform workspace new ${cluster} || true'
+                            sh '${TERRAFORM_HOME}/terraform workspace select ${cluster}'
+                        }
+                    }
+                }
+            }
         }
-
 
         stage('validate') {
             when {
                 expression { params.action == 'preview' || params.action == 'apply' || params.action == 'destroy' }
             }
             steps {
-                    withCredentials([[$class: 'AmazonWebServicesCredentialsBinding',
-                          credentialsId: 'aws-creds',
-                          accessKeyVariable: 'AWS_ACCESS_KEY_ID',
-                          secretKeyVariable: 'AWS_SECRET_ACCESS_KEY' ]]) {
+                    withCredentials([[$class: 'AmazonWebServicesCredentialsBinding',credentialsId: 'awsCredentials',accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY' ]]) {
                     wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']) {
-                        dir ("/var/jenkins_home/workspace/myjenkins/provisioning/") { 
-                            sh '${GROOVY_HOME}/terraform validate'
+                        dir ("provisioning") { 
+                            sh '${TERRAFORM_HOME}/terraform validate --var-file=${cluster}-terraform.tfvars'
                         }
                     }
                 }
@@ -57,13 +76,10 @@ pipeline {
                 expression { params.action == 'preview' }
             }
             steps {
-                    withCredentials([[$class: 'AmazonWebServicesCredentialsBinding',
-                          credentialsId: 'aws-creds',
-                          accessKeyVariable: 'AWS_ACCESS_KEY_ID',
-                          secretKeyVariable: 'AWS_SECRET_ACCESS_KEY' ]]) {
+                    withCredentials([[$class: 'AmazonWebServicesCredentialsBinding',credentialsId: 'awsCredentials',accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY' ]]) {
                     wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']) {
-                        dir ("/var/jenkins_home/workspace/myjenkins/provisioning/") {
-                             sh '${GROOVY_HOME}/terraform plan'
+                        dir ("provisioning") {
+                             sh '${TERRAFORM_HOME}/terraform plan --var-file=${cluster}-terraform.tfvars'
                         }
                     }
                 }
@@ -75,14 +91,11 @@ pipeline {
                 expression { params.action == 'apply' }
             }
             steps {
-                    withCredentials([[$class: 'AmazonWebServicesCredentialsBinding',
-                          credentialsId: 'aws-creds',
-                          accessKeyVariable: 'AWS_ACCESS_KEY_ID',
-                          secretKeyVariable: 'AWS_SECRET_ACCESS_KEY' ]]) {
+                    withCredentials([[$class: 'AmazonWebServicesCredentialsBinding',credentialsId: 'awsCredentials',accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY' ]]) {
                     wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']) {
-                        dir ("/var/jenkins_home/workspace/myjenkins/provisioning/") {
-                               sh '${GROOVY_HOME}/terraform plan -out=plan'
-                               sh '${GROOVY_HOME}/terraform apply -auto-approve plan'
+                        dir ("provisioning") {
+                               sh '${TERRAFORM_HOME}/terraform plan -out=${cluster}-plan --var-file=${cluster}-terraform.tfvars'
+                               sh '${TERRAFORM_HOME}/terraform apply -auto-approve ${cluster}-plan --var-file=${cluster}-terraform.tfvars'
                         }
                     }
                 }
@@ -94,13 +107,10 @@ pipeline {
                 expression { params.action == 'show' }
             }
             steps {
-                    withCredentials([[$class: 'AmazonWebServicesCredentialsBinding',
-                          credentialsId: 'aws-creds',
-                          accessKeyVariable: 'AWS_ACCESS_KEY_ID',
-                          secretKeyVariable: 'AWS_SECRET_ACCESS_KEY' ]]) {
+                    withCredentials([[$class: 'AmazonWebServicesCredentialsBinding',credentialsId: 'awsCredentials',accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY' ]]) {
                     wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']) {
-                        dir ("/var/jenkins_home/workspace/myjenkins/provisioning/") {
-                               sh '${GROOVY_HOME}/terraform show'
+                        dir ("provisioning") {
+                               sh '${TERRAFORM_HOME}/terraform show --var-file=${cluster}-terraform.tfvars'
                         }
                     }
                 }
@@ -112,13 +122,10 @@ pipeline {
                 expression { params.action == 'preview-destroy' }
             }
             steps {
-                    withCredentials([[$class: 'AmazonWebServicesCredentialsBinding',
-                          credentialsId: 'aws-creds',
-                          accessKeyVariable: 'AWS_ACCESS_KEY_ID',
-                          secretKeyVariable: 'AWS_SECRET_ACCESS_KEY' ]]) {
+                    withCredentials([[$class: 'AmazonWebServicesCredentialsBinding',credentialsId: 'awsCredentials',accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY' ]]) {
                     wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']) {
-                        dir ("/var/jenkins_home/workspace/myjenkins/provisioning/") {
-                               sh '${GROOVY_HOME}/terraform plan -destroy'
+                        dir ("provisioning") {
+                               sh '${TERRAFORM_HOME}/terraform plan -destroy --var-file=${cluster}-terraform.tfvars'
                         }
                     }
                 }
@@ -130,13 +137,10 @@ pipeline {
                 expression { params.action == 'destroy' }
             }
             steps {
-                    withCredentials([[$class: 'AmazonWebServicesCredentialsBinding',
-                          credentialsId: 'aws-creds',
-                          accessKeyVariable: 'AWS_ACCESS_KEY_ID',
-                          secretKeyVariable: 'AWS_SECRET_ACCESS_KEY' ]]) {
+                    withCredentials([[$class: 'AmazonWebServicesCredentialsBinding',credentialsId: 'awsCredentials',accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY' ]]) {
                     wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']) {
-                        dir ("/var/jenkins_home/workspace/myjenkins/provisioning/") {
-                            sh '${GROOVY_HOME}/terraform destroy -force'
+                        dir ("provisioning") {
+                            sh '${TERRAFORM_HOME}/terraform destroy -force --var-file=${cluster}-terraform.tfvars'
                         }
                     }
                 }
