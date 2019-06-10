@@ -1,0 +1,132 @@
+pipeline {
+    agent any
+
+   environment {
+       GROOVY_HOME = tool name: 'Terraform', type: 'com.cloudbees.jenkins.plugins.customtools.CustomTool'
+    }   
+    options {
+        ansiColor('xterm')
+    }
+    parameters {
+        choice(
+            choices: ['preview' , 'apply' , 'show', 'preview-destroy' , 'destroy'],
+            description: 'Terraform action to apply',
+            name: 'action')
+        choice(
+            choices: ['master' , 'dev' , 'qa', 'staging'],
+            description: 'Choose branch to build and deploy',
+            name: 'branch')
+    }
+    
+    stages {
+        stage('Git Checkout'){
+         steps {
+		    git url: 'https://github.com/SubhakarKotta/aws-eks-rds-terraform',branch: "${params.branch}"
+         }
+	    }
+
+        stage('init') {
+            steps {
+                sh '${GROOVY_HOME}/terraform version'
+                sh '${GROOVY_HOME}/terraform init -backend-config="bucket=${CLUSTER_NAME}-tfstate" -backend-config="key=${CLUSTER_NAME}/terraform.tfstate" -backend-config="region=${REGION_NAME}"'
+            }
+        }
+
+
+        stage('validate') {
+            when {
+                expression { params.action == 'preview' || params.action == 'apply' || params.action == 'destroy' }
+            }
+            steps {
+                    withCredentials([[$class: 'AmazonWebServicesCredentialsBinding',
+                          credentialsId: 'aws-creds',
+                          accessKeyVariable: 'AWS_ACCESS_KEY_ID',
+                          secretKeyVariable: 'AWS_SECRET_ACCESS_KEY' ]]) {
+                    wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']) {
+                            sh '${GROOVY_HOME}/terraform validate'
+                    }
+                }
+            }
+        }
+        stage('preview') {
+            when {
+                expression { params.action == 'preview' }
+            }
+            steps {
+                    withCredentials([[$class: 'AmazonWebServicesCredentialsBinding',
+                          credentialsId: 'aws-creds',
+                          accessKeyVariable: 'AWS_ACCESS_KEY_ID',
+                          secretKeyVariable: 'AWS_SECRET_ACCESS_KEY' ]]) {
+                    wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']) {
+                             sh '${GROOVY_HOME}/terraform plan'
+                    }
+                }
+            }
+        }
+       
+        stage('apply') {
+            when {
+                expression { params.action == 'apply' }
+            }
+            steps {
+                    withCredentials([[$class: 'AmazonWebServicesCredentialsBinding',
+                          credentialsId: 'aws-creds',
+                          accessKeyVariable: 'AWS_ACCESS_KEY_ID',
+                          secretKeyVariable: 'AWS_SECRET_ACCESS_KEY' ]]) {
+                    wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']) {
+                               sh '${GROOVY_HOME}/terraform plan -out=plan'
+                               sh '${GROOVY_HOME}/terraform apply -auto-approve plan'
+                    }
+                }
+            }
+        }
+
+        stage('show') {
+            when {
+                expression { params.action == 'show' }
+            }
+            steps {
+                    withCredentials([[$class: 'AmazonWebServicesCredentialsBinding',
+                          credentialsId: 'aws-creds',
+                          accessKeyVariable: 'AWS_ACCESS_KEY_ID',
+                          secretKeyVariable: 'AWS_SECRET_ACCESS_KEY' ]]) {
+                    wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']) {
+                               sh '${GROOVY_HOME}/terraform show'
+                    }
+                }
+            }
+        }
+        
+        stage('preview-destroy') {
+            when {
+                expression { params.action == 'preview-destroy' }
+            }
+            steps {
+                    withCredentials([[$class: 'AmazonWebServicesCredentialsBinding',
+                          credentialsId: 'aws-creds',
+                          accessKeyVariable: 'AWS_ACCESS_KEY_ID',
+                          secretKeyVariable: 'AWS_SECRET_ACCESS_KEY' ]]) {
+                    wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']) {
+                               sh '${GROOVY_HOME}/terraform plan -destroy'
+                    }
+                }
+            }
+        }
+       
+        stage('destroy') {
+            when {
+                expression { params.action == 'destroy' }
+            }
+            steps {
+                    withCredentials([[$class: 'AmazonWebServicesCredentialsBinding',
+                          credentialsId: 'aws-creds',
+                          accessKeyVariable: 'AWS_ACCESS_KEY_ID',
+                          secretKeyVariable: 'AWS_SECRET_ACCESS_KEY' ]]) {
+                    wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']) {
+                            sh '${GROOVY_HOME}/terraform destroy -force'
+                    }
+                }
+            }
+        }
+    }
+}
