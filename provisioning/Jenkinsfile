@@ -27,7 +27,7 @@ pipeline {
 
         stage('init') {
             steps {
-                  dir ("/var/jenkins_home/workspace/myjenkins/provisioning") {
+                  dir ("/var/jenkins_home/workspace/myjenkins/provisioning/") {
                         sh '${GROOVY_HOME}/terraform version'
                         sh '${GROOVY_HOME}/terraform init -backend-config="bucket=${CLUSTER_NAME}-tfstate" -backend-config="key=${CLUSTER_NAME}/terraform.tfstate" -backend-config="region=${REGION_NAME}"'
                   }     
@@ -45,7 +45,7 @@ pipeline {
                           accessKeyVariable: 'AWS_ACCESS_KEY_ID',
                           secretKeyVariable: 'AWS_SECRET_ACCESS_KEY' ]]) {
                     wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']) {
-                        dir ("/var/jenkins_home/workspace/myjenkins/provisioning") { 
+                        dir ("/var/jenkins_home/workspace/myjenkins/provisioning/") { 
                             sh '${GROOVY_HOME}/terraform validate'
                         }
                     }
@@ -62,7 +62,7 @@ pipeline {
                           accessKeyVariable: 'AWS_ACCESS_KEY_ID',
                           secretKeyVariable: 'AWS_SECRET_ACCESS_KEY' ]]) {
                     wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']) {
-                        dir ("/var/jenkins_home/workspace/myjenkins/provisioning") {
+                        dir ("/var/jenkins_home/workspace/myjenkins/provisioning/") {
                              sh '${GROOVY_HOME}/terraform plan'
                         }
                     }
@@ -80,7 +80,7 @@ pipeline {
                           accessKeyVariable: 'AWS_ACCESS_KEY_ID',
                           secretKeyVariable: 'AWS_SECRET_ACCESS_KEY' ]]) {
                     wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']) {
-                        dir ("/var/jenkins_home/workspace/myjenkins/provisioning") {
+                        dir ("/var/jenkins_home/workspace/myjenkins/provisioning/") {
                                sh '${GROOVY_HOME}/terraform plan -out=plan'
                                sh '${GROOVY_HOME}/terraform apply -auto-approve plan'
                         }
@@ -99,7 +99,7 @@ pipeline {
                           accessKeyVariable: 'AWS_ACCESS_KEY_ID',
                           secretKeyVariable: 'AWS_SECRET_ACCESS_KEY' ]]) {
                     wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']) {
-                        dir ("/var/jenkins_home/workspace/myjenkins/provisioning") {
+                        dir ("/var/jenkins_home/workspace/myjenkins/provisioning/") {
                                sh '${GROOVY_HOME}/terraform show'
                         }
                     }
@@ -117,7 +117,7 @@ pipeline {
                           accessKeyVariable: 'AWS_ACCESS_KEY_ID',
                           secretKeyVariable: 'AWS_SECRET_ACCESS_KEY' ]]) {
                     wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']) {
-                        dir ("/var/jenkins_home/workspace/myjenkins/provisioning") {
+                        dir ("/var/jenkins_home/workspace/myjenkins/provisioning/") {
                                sh '${GROOVY_HOME}/terraform plan -destroy'
                         }
                     }
@@ -135,7 +135,7 @@ pipeline {
                           accessKeyVariable: 'AWS_ACCESS_KEY_ID',
                           secretKeyVariable: 'AWS_SECRET_ACCESS_KEY' ]]) {
                     wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']) {
-                        dir ("/var/jenkins_home/workspace/myjenkins/provisioning") {
+                        dir ("/var/jenkins_home/workspace/myjenkins/provisioning/") {
                             sh '${GROOVY_HOME}/terraform destroy -force'
                         }
                     }
