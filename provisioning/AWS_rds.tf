@@ -58,8 +58,8 @@ module "db" {
 
   # disable backups to create DB faster
   backup_retention_period = 0
-  
-  tags                    = "${var.AWS_tags}"
+
+  tags = "${var.AWS_tags}"
 
   # DB subnet group
   subnet_ids = ["${module.vpc.public_subnets}"]
