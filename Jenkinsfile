@@ -19,7 +19,7 @@ pipeline {
             choices: ['master' , 'dev' , 'qa', 'staging'],
             description: 'Choose branch to build and deploy',
             name: 'branch')
-        string(name: 'credential', defaultValue : 'kotts1', description: "Credential that provides the AWS access key and secret. ")
+        string(name: 'credential', defaultValue : '', description: "Provide your AWS CredentialID from Global credentials")
         string(name: 'bucket', defaultValue : 'subhakar-state-bucket', description: "Existing bucket name to store .tfstate file. ")
         string(name: 'region', defaultValue : 'us-west-2', description: "Region name where the bucket resides.")
         string(name: 'cluster', defaultValue : 'demo-cloud', description: "EKS Cluster name [non existing cluster in case of new].")
