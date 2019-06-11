@@ -49,7 +49,6 @@ pipeline {
             steps {
                     wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']) {
                         dir ("provisioning") { 
-                            echo " =========== ^^^^^^^^^^^^ Using AWS Credential : ${credential}"
                             echo "${parameters}"
                             writeFile file: "${cluster}-terraform.tfvars", text: "${parameters}"
                             echo " =========== ^^^^^^^^^^^^ Created file ${cluster}-terraform.tfvars"
@@ -63,7 +62,7 @@ pipeline {
                     withCredentials([[$class: 'AmazonWebServicesCredentialsBinding',credentialsId: params.credential,accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY' ]]) {
                     wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']) {
                         dir ("provisioning") { 
-                            writeFile file: "${cluster}-terraform.tfvars", text: "${parameters}"
+                            echo " =========== ^^^^^^^^^^^^ Using AWS Credential : ${credential}"
                             sh '${TERRAFORM_HOME}/terraform version'
                             sh '${TERRAFORM_HOME}/terraform init -backend-config="bucket=${bucket}" -backend-config="key=${cluster}/terraform.tfstate" -backend-config="region=${region}"'
                             sh '${TERRAFORM_HOME}/terraform workspace new ${cluster} || true'
