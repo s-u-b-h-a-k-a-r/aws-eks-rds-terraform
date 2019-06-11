@@ -19,9 +19,10 @@ pipeline {
             choices: ['master' , 'dev' , 'qa', 'staging'],
             description: 'Choose branch to build and deploy',
             name: 'branch')
-        string(name: 'bucket', defaultValue : 'subhakar-state-bucket', description: "Existing bucket name to store .tfstate file ")
-        string(name: 'region', defaultValue : 'us-west-2', description: "Region name where the bucket resides")
-        string(name: 'cluster', defaultValue : 'demo-cloud', description: "EKS Cluster name [non existing cluster in case of new]")
+        string(name: 'credential', defaultValue : 'kotts1', description: "Credential that provides the AWS access key and secret. ")
+        string(name: 'bucket', defaultValue : 'subhakar-state-bucket', description: "Existing bucket name to store .tfstate file. ")
+        string(name: 'region', defaultValue : 'us-west-2', description: "Region name where the bucket resides.")
+        string(name: 'cluster', defaultValue : 'demo-cloud', description: "EKS Cluster name [non existing cluster in case of new].")
         text(name: 'parameters', defaultValue : 'Please provide all the parameters by visiting the github link [https://github.com/SubhakarKotta/aws-eks-rds-terraform/blob/master/provisioning/terraform.tfvars]. Make sure you update the values as per your requirements also provide unique values for the parameters AWS_vpc_name|AWS_rds_identifier|', description: "")
     }
     
@@ -48,6 +49,7 @@ pipeline {
             steps {
                     wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']) {
                         dir ("provisioning") { 
+                            echo " =========== ^^^^^^^^^^^^ Using AWS Credential : ${credential}"
                             echo "${parameters}"
                             writeFile file: "${cluster}-terraform.tfvars", text: "${parameters}"
                             echo " =========== ^^^^^^^^^^^^ Created file ${cluster}-terraform.tfvars"
@@ -58,7 +60,7 @@ pipeline {
          
         stage('init') {
             steps {
-                    withCredentials([[$class: 'AmazonWebServicesCredentialsBinding',credentialsId: 'awsCredentials',accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY' ]]) {
+                    withCredentials([[$class: 'AmazonWebServicesCredentialsBinding',credentialsId: params.credential,accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY' ]]) {
                     wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']) {
                         dir ("provisioning") { 
                             writeFile file: "${cluster}-terraform.tfvars", text: "${parameters}"
@@ -77,7 +79,7 @@ pipeline {
                 expression { params.action == 'preview' || params.action == 'create' }
             }
             steps {
-                    withCredentials([[$class: 'AmazonWebServicesCredentialsBinding',credentialsId: 'awsCredentials',accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY' ]]) {
+                    withCredentials([[$class: 'AmazonWebServicesCredentialsBinding',credentialsId: params.credential,accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY' ]]) {
                     wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']) {
                         dir ("provisioning") { 
                             sh '${TERRAFORM_HOME}/terraform validate -var EKS_name=${cluster} --var-file=${cluster}-terraform.tfvars'
@@ -91,7 +93,7 @@ pipeline {
                 expression { params.action == 'preview' }
             }
             steps {
-                    withCredentials([[$class: 'AmazonWebServicesCredentialsBinding',credentialsId: 'awsCredentials',accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY' ]]) {
+                    withCredentials([[$class: 'AmazonWebServicesCredentialsBinding',credentialsId: params.credential,accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY' ]]) {
                     wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']) {
                         dir ("provisioning") {
                              sh '${TERRAFORM_HOME}/terraform plan -var EKS_name=${cluster} --var-file=${cluster}-terraform.tfvars'
@@ -106,7 +108,7 @@ pipeline {
                 expression { params.action == 'create' }
             }
             steps {
-                    withCredentials([[$class: 'AmazonWebServicesCredentialsBinding',credentialsId: 'awsCredentials',accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY' ]]) {
+                    withCredentials([[$class: 'AmazonWebServicesCredentialsBinding',credentialsId: params.credential,accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY' ]]) {
                     wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']) {
                         dir ("provisioning") {
                                sh '${TERRAFORM_HOME}/terraform plan -out=${cluster}-plan -var EKS_name=${cluster}  --var-file=${cluster}-terraform.tfvars'
@@ -122,7 +124,7 @@ pipeline {
                 expression { params.action == 'create' }
             }
             steps {
-                    withCredentials([[$class: 'AmazonWebServicesCredentialsBinding',credentialsId: 'awsCredentials',accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY' ]]) {
+                    withCredentials([[$class: 'AmazonWebServicesCredentialsBinding',credentialsId: params.credential,accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY' ]]) {
                     wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']) {
                         dir ("provisioning") {
                                sh '${TERRAFORM_HOME}/terraform output kubeconfig > ./${cluster}_kubeconfig'
@@ -140,7 +142,7 @@ pipeline {
                 expression { params.action == 'show' }
             }
             steps {
-                    withCredentials([[$class: 'AmazonWebServicesCredentialsBinding',credentialsId: 'awsCredentials',accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY' ]]) {
+                    withCredentials([[$class: 'AmazonWebServicesCredentialsBinding',credentialsId: params.credential,accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY' ]]) {
                     wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']) {
                         dir ("provisioning") {
                                sh '${TERRAFORM_HOME}/terraform show'
@@ -155,7 +157,7 @@ pipeline {
                 expression { params.action == 'preview-destroy' }
             }
             steps {
-                    withCredentials([[$class: 'AmazonWebServicesCredentialsBinding',credentialsId: 'awsCredentials',accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY' ]]) {
+                    withCredentials([[$class: 'AmazonWebServicesCredentialsBinding',credentialsId: params.credential,accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY' ]]) {
                     wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']) {
                         dir ("provisioning") {
                                sh '${TERRAFORM_HOME}/terraform workspace select ${cluster}'
@@ -171,7 +173,7 @@ pipeline {
                 expression { params.action == 'destroy' }
             }
             steps {
-                    withCredentials([[$class: 'AmazonWebServicesCredentialsBinding',credentialsId: 'awsCredentials',accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY' ]]) {
+                    withCredentials([[$class: 'AmazonWebServicesCredentialsBinding',credentialsId: params.credential,accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY' ]]) {
                     wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']) {
                         dir ("provisioning") {
                             sh '${TERRAFORM_HOME}/terraform workspace select ${cluster}'
