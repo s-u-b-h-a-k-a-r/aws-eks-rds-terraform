@@ -12,17 +12,17 @@ pipeline {
     }
     parameters {
         choice(
-            choices: ['preview' , 'apply' , 'show', 'preview-destroy' , 'destroy'],
-            description: 'Terraform action to apply',
+            choices: ['preview' , 'create' , 'show', 'preview-destroy' , 'destroy'],
+            description: '1 #  preview - to list the resources being created  2 #  create - creates a new cluster   3 #  show - list the resources of existing cluster  4 #  preview-destroy - list the resources of existing cluster that will be destroyed   5 #  destroy - destroys the cluster',
             name: 'action')
         choice(
             choices: ['master' , 'dev' , 'qa', 'staging'],
             description: 'Choose branch to build and deploy',
             name: 'branch')
-        string(name: 'bucket', defaultValue : 'subhakar-state-bucket', description: "Bucket name to store .tfstate file")
+        string(name: 'bucket', defaultValue : 'subhakar-state-bucket', description: "Existing bucket name to store .tfstate file ")
         string(name: 'region', defaultValue : 'us-west-2', description: "Region name where the bucket resides")
-        string(name: 'cluster', defaultValue : 'demo-cloud', description: "EKS Cluster name")
-        text(name: 'parameters', defaultValue : 'Please check the input https://github.com/SubhakarKotta/aws-eks-rds-terraform/blob/master/provisioning/terraform.tfvars', description: "Parameters that are required by terraform to create cluster. File <cluster>-terraform.tfvars will be created and will be feeded as input to terraform through --var-file parameter")
+        string(name: 'cluster', defaultValue : 'demo-cloud', description: "EKS Cluster name [non existing cluster in case of new]")
+        text(name: 'parameters', defaultValue : 'Please provide all the parameters by visiting the github link [https://github.com/SubhakarKotta/aws-eks-rds-terraform/blob/master/provisioning/terraform.tfvars]. Make sure you update the values as per your requirements also provide unique values for the parameters AWS_vpc_name|AWS_rds_identifier|', description: "")
     }
     
      stages {
@@ -43,7 +43,7 @@ pipeline {
         
         stage('Create terraform.tfvars') {
             when {
-                expression { params.action == 'preview' || params.action == 'apply' }
+                expression { params.action == 'preview' || params.action == 'create' }
             }
             steps {
                     wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']) {
@@ -74,7 +74,7 @@ pipeline {
 
         stage('validate') {
             when {
-                expression { params.action == 'preview' || params.action == 'apply' }
+                expression { params.action == 'preview' || params.action == 'create' }
             }
             steps {
                     withCredentials([[$class: 'AmazonWebServicesCredentialsBinding',credentialsId: 'awsCredentials',accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY' ]]) {
@@ -101,9 +101,9 @@ pipeline {
             }
         }
        
-        stage('apply') {
+        stage('create') {
             when {
-                expression { params.action == 'apply' }
+                expression { params.action == 'create' }
             }
             steps {
                     withCredentials([[$class: 'AmazonWebServicesCredentialsBinding',credentialsId: 'awsCredentials',accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY' ]]) {
@@ -116,6 +116,24 @@ pipeline {
                 }
             }
         }
+
+         stage('dashboard') {
+            when {
+                expression { params.action == 'preview' }
+            }
+            steps {
+                    withCredentials([[$class: 'AmazonWebServicesCredentialsBinding',credentialsId: 'awsCredentials',accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY' ]]) {
+                    wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']) {
+                        dir ("provisioning") {
+                               sh '${TERRAFORM_HOME}/terraform output kubeconfig > ./kubeconfig'
+                               sh 'export KUBECONFIG=./kubeconfig'
+                               sh 'kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v1.10.1/src/deploy/recommended/kubernetes-dashboard.yaml --kubeconfig=./kubeconfig'
+                               sh 'kubectl apply -f eks-admin-service-account.yaml --kubeconfig=./kubeconfig'
+                        }
+                    }
+                }
+            }
+         }       
 
         stage('show') {
             when {
