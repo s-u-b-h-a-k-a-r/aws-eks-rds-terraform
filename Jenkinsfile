@@ -14,7 +14,7 @@ pipeline {
     }
     parameters {       
         choice(
-            choices: ['preview' , 'create' , 'show', 'preview-destroy' , 'destroy'],
+            choices: ['preview' , 'create' , 'show', 'preview-destroy' , 'destroy', 'remove-state'],
             description: '<H4>preview - to list the resources being created <br> create - creates a new cluster <br> show - list the resources of existing cluster <br> preview-destroy - list the resources of existing cluster that will be destroyed><br>destroy - destroys the cluster</H4>',
             name: 'action')
         choice(
@@ -26,6 +26,7 @@ pipeline {
         string(name: 'region', defaultValue : 'us-west-2', description: "<H4>Region name where the bucket resides.</H4>")
         string(name: 'cluster', defaultValue : 'demo-cloud', description: "<H4>Unique EKS Cluster name [non existing cluster in case of new].</H4>")
         text(name: 'parameters', defaultValue : '', description: "<H4>Provide all the parameters by visiting the below github link <br>https://github.com/SubhakarKotta/aws-eks-rds-terraform/blob/master/provisioning/terraform.tfvars <br><br> Make sure you update the values as per your requirements <br><br> Provide unique values for the below parameters <br> AWS_vpc_name|AWS_rds_identifier by appending  (cluster name)<br> E.g. <br> cluster: {demo-cluster} <br> AWS_vpc_name: {demo-cluster-vpc} <br>AWS_rds_identifier : {demo-cluster} </H4>")
+        string(name: 'state', defaultValue : '', description: "<H4>Provide the json path to remove state</H4>")
     }
     
      stages {
@@ -58,8 +59,27 @@ pipeline {
                     }
             }
         }
-         
+     
+      stage('remove-state') {
+            when {
+                expression { params.action == 'remove-state' }
+            }
+            steps {
+                    withCredentials([[$class: 'AmazonWebServicesCredentialsBinding',credentialsId: params.credential,accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY' ]]) {
+                    wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']) {
+                        dir ("provisioning") { 
+                            sh ' terraform state rm ${state} '
+                        }
+                    }
+                }
+            }
+        }
+
+
         stage('init') {
+            when {
+                expression { params.action == 'preview' || params.action == 'create' || params.action == 'preview-destroy' || params.action == 'destroy'  || params.action == 'show' }
+            }
             steps {
                     withCredentials([[$class: 'AmazonWebServicesCredentialsBinding',credentialsId: params.credential,accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY' ]]) {
                     wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']) {
