@@ -15,7 +15,12 @@ data "aws_eks_cluster_auth" "cluster-auth" {
   depends_on = ["module.eks", "null_resource.k8s-tiller-rbac"]
   name = "${var.EKS_name}"
 }
-
+provider "kubernetes" {
+    host = "${data.aws_eks_cluster.cluster.endpoint}"
+    cluster_ca_certificate = "${base64decode(data.aws_eks_cluster.cluster.certificate_authority.0.data)}"
+    token = "${data.aws_eks_cluster_auth.cluster-auth.token}"
+ }
+ 
 provider "helm" {
   namespace = "kube-system"
   install_tiller = true
