@@ -4,6 +4,7 @@ pipeline {
    environment {
        TERRAFORM_HOME = tool name: 'terraform', type: 'com.cloudbees.jenkins.plugins.customtools.CustomTool'
        KUBECTL_HOME = tool name: 'kubectl', type: 'com.cloudbees.jenkins.plugins.customtools.CustomTool'
+       AWS_IAM_AUTHENTICATOR_HOME = tool name: 'aws-iam-authenticator', type: 'com.cloudbees.jenkins.plugins.customtools.CustomTool'
     }   
     options {
         disableConcurrentBuilds()
@@ -63,10 +64,9 @@ pipeline {
                     wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']) {
                         dir ("provisioning") { 
                             echo " =========== ^^^^^^^^^^^^ Using AWS Credential : ${credential}"
+			    sh 'rm -rf .terraform'
                             sh '${TERRAFORM_HOME}/terraform version'
                             sh '${TERRAFORM_HOME}/terraform init -backend-config="bucket=${bucket}" -backend-config="key=${cluster}/terraform.tfstate" -backend-config="region=${region}"'
-                            sh '${TERRAFORM_HOME}/terraform workspace new ${cluster} || true'
-                            sh '${TERRAFORM_HOME}/terraform workspace select ${cluster}'
                         }
                     }
                 }
@@ -159,7 +159,6 @@ pipeline {
                     withCredentials([[$class: 'AmazonWebServicesCredentialsBinding',credentialsId: params.credential,accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY' ]]) {
                     wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']) {
                         dir ("provisioning") {
-                               sh '${TERRAFORM_HOME}/terraform workspace select ${cluster}'
                                sh '${TERRAFORM_HOME}/terraform plan -destroy'
                         }
                     }
@@ -175,7 +174,6 @@ pipeline {
                     withCredentials([[$class: 'AmazonWebServicesCredentialsBinding',credentialsId: params.credential,accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY' ]]) {
                     wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']) {
                         dir ("provisioning") {
-                            sh '${TERRAFORM_HOME}/terraform workspace select ${cluster}'
                             sh '${TERRAFORM_HOME}/terraform destroy -force'
                         }
                     }
