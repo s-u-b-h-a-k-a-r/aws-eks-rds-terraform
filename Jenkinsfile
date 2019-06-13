@@ -11,20 +11,20 @@ pipeline {
         timeout(time: 1, unit: 'HOURS')
         ansiColor('xterm')
     }
-    parameters {
+    parameters {       
         choice(
             choices: ['preview' , 'create' , 'show', 'preview-destroy' , 'destroy'],
-            description: '1 #  preview - to list the resources being created  2 #  create - creates a new cluster   3 #  show - list the resources of existing cluster  4 #  preview-destroy - list the resources of existing cluster that will be destroyed   5 #  destroy - destroys the cluster',
+            description: '<H4>preview - to list the resources being created <br> create - creates a new cluster <br> show - list the resources of existing cluster <br> preview-destroy - list the resources of existing cluster that will be destroyed><br>destroy - destroys the cluster</H4>',
             name: 'action')
         choice(
             choices: ['master' , 'dev' , 'qa', 'staging'],
-            description: 'Choose branch to build and deploy',
+            description: '<H4>Choose branch to build and deploy</H4>',
             name: 'branch')
-        string(name: 'credential', defaultValue : '', description: "Provide your AWS CredentialID from Global credentials")
-        string(name: 'bucket', defaultValue : 'subhakar-state-bucket', description: "Existing bucket name to store .tfstate file. ")
-        string(name: 'region', defaultValue : 'us-west-2', description: "Region name where the bucket resides.")
-        string(name: 'cluster', defaultValue : 'demo-cloud', description: "EKS Cluster name [non existing cluster in case of new].")
-        text(name: 'parameters', defaultValue : 'Please provide all the parameters by visiting the github link [https://github.com/SubhakarKotta/aws-eks-rds-terraform/blob/master/provisioning/terraform.tfvars]. Make sure you update the values as per your requirements also provide unique values for the parameters AWS_vpc_name|AWS_rds_identifier|', description: "")
+        string(name: 'credential', defaultValue : '', description: "<H4>Provide your  AWS Credential ID from Global credentials</H4>")
+        string(name: 'bucket', defaultValue : 'subhakar-state-bucket', description: "<H4>Existing S3 bucket name to store .tfstate file.</H4>")
+        string(name: 'region', defaultValue : 'us-west-2', description: "<H4>Region name where the bucket resides.</H4>")
+        string(name: 'cluster', defaultValue : 'demo-cloud', description: "<H4>Unique EKS Cluster name [non existing cluster in case of new].</H4>")
+        text(name: 'parameters', defaultValue : '', description: "<H4>Provide all the parameters by visiting the below github link <br>https://github.com/SubhakarKotta/aws-eks-rds-terraform/blob/master/provisioning/terraform.tfvars <br><br> Make sure you update the values as per your requirements <br><br> Provide unique values for the below parameters <br> AWS_vpc_name|AWS_rds_identifier by appending  (cluster name)<br> E.g. <br> cluster: {demo-cluster} <br> AWS_vpc_name: {demo-cluster-vpc} <br>AWS_rds_identifier : {demo-cluster} </H4>")
     }
     
      stages {
@@ -64,7 +64,7 @@ pipeline {
                     wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']) {
                         dir ("provisioning") { 
                             echo " =========== ^^^^^^^^^^^^ Using AWS Credential : ${credential}"
-			    sh 'rm -rf .terraform'
+			                sh 'rm -rf .terraform'
                             sh '${TERRAFORM_HOME}/terraform version'
                             sh '${TERRAFORM_HOME}/terraform init -backend-config="bucket=${bucket}" -backend-config="key=${cluster}/terraform.tfstate" -backend-config="region=${region}"'
                         }
