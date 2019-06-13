@@ -2,7 +2,7 @@ pipeline {
    agent { label 'master' }
 
    environment {
-       TERRAFORM_HOME = tool name: 'terraform', type: 'com.cloudbees.jenkins.plugins.customtools.CustomTool'
+       TERRAFORM_HOME = tool name: 'terraform12', type: 'com.cloudbees.jenkins.plugins.customtools.CustomTool'
        KUBECTL_HOME = tool name: 'kubectl', type: 'com.cloudbees.jenkins.plugins.customtools.CustomTool'
        AWS_IAM_AUTHENTICATOR_HOME = tool name: 'aws-iam-authenticator', type: 'com.cloudbees.jenkins.plugins.customtools.CustomTool'
     }   
