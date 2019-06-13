@@ -65,8 +65,7 @@ pipeline {
                     wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']) {
                         dir ("provisioning") { 
                             echo " =========== ^^^^^^^^^^^^ Using AWS Credential : ${credential}"
-                            sh 'helm version'
-                            sh 'helm init --client-ony'
+                            sh 'helm init --client-only'
 			                sh 'rm -rf .terraform'
                             sh '${TERRAFORM_HOME}/terraform version'
                             sh '${TERRAFORM_HOME}/terraform init -backend-config="bucket=${bucket}" -backend-config="key=${cluster}/terraform.tfstate" -backend-config="region=${region}"'
