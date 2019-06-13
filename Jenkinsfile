@@ -159,7 +159,7 @@ pipeline {
                     withCredentials([[$class: 'AmazonWebServicesCredentialsBinding',credentialsId: params.credential,accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY' ]]) {
                     wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']) {
                         dir ("provisioning") {
-                               sh '${TERRAFORM_HOME}/terraform plan -destroy'
+                               sh '${TERRAFORM_HOME}/terraform plan -var EKS_name=${cluster} -destroy'
                         }
                     }
                 }
@@ -174,7 +174,7 @@ pipeline {
                     withCredentials([[$class: 'AmazonWebServicesCredentialsBinding',credentialsId: params.credential,accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY' ]]) {
                     wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']) {
                         dir ("provisioning") {
-                            sh '${TERRAFORM_HOME}/terraform destroy -force'
+                            sh '${TERRAFORM_HOME}/terraform destroy -var EKS_name=${cluster} -force'
                         }
                     }
                 }
