@@ -1,4 +1,3 @@
-
 resource "null_resource" "k8s-tiller-rbac" {
   depends_on = ["module.eks"]
 
@@ -6,33 +5,36 @@ resource "null_resource" "k8s-tiller-rbac" {
     kube_config_rendered = "${module.eks.kubeconfig}"
   }
 }
+
 data "aws_eks_cluster" "cluster" {
   depends_on = ["module.eks"]
-  name = "${var.EKS_name}"
+  name       = "${var.EKS_name}"
 }
 
 data "aws_eks_cluster_auth" "cluster-auth" {
   depends_on = ["module.eks", "null_resource.k8s-tiller-rbac"]
-  name = "${var.EKS_name}"
+  name       = "${var.EKS_name}"
 }
+
 provider "kubernetes" {
-    host = "${data.aws_eks_cluster.cluster.endpoint}"
-    cluster_ca_certificate = "${base64decode(data.aws_eks_cluster.cluster.certificate_authority.0.data)}"
-    token = "${data.aws_eks_cluster_auth.cluster-auth.token}"
- }
- 
+  host                   = "${data.aws_eks_cluster.cluster.endpoint}"
+  cluster_ca_certificate = "${base64decode(data.aws_eks_cluster.cluster.certificate_authority.0.data)}"
+  token                  = "${data.aws_eks_cluster_auth.cluster-auth.token}"
+}
+
 provider "helm" {
-  namespace = "kube-system"
-  install_tiller = true
-  tiller_image = "gcr.io/kubernetes-helm/tiller:v2.14.0"
+  namespace       = "kube-system"
+  install_tiller  = true
+  tiller_image    = "gcr.io/kubernetes-helm/tiller:v2.14.0"
   service_account = "tiller"
 
   kubernetes {
-    host = "${data.aws_eks_cluster.cluster.endpoint}"
+    host                   = "${data.aws_eks_cluster.cluster.endpoint}"
     cluster_ca_certificate = "${base64decode(data.aws_eks_cluster.cluster.certificate_authority.0.data)}"
-    token = "${data.aws_eks_cluster_auth.cluster-auth.token}"
+    token                  = "${data.aws_eks_cluster_auth.cluster-auth.token}"
   }
 }
+
 resource "kubernetes_service_account" "tiller" {
   metadata {
     name      = "tiller"
@@ -40,7 +42,7 @@ resource "kubernetes_service_account" "tiller" {
   }
 
   automount_service_account_token = true
-  depends_on = ["module.eks", "null_resource.k8s-tiller-rbac"]
+  depends_on                      = ["module.eks", "null_resource.k8s-tiller-rbac"]
 }
 
 resource "kubernetes_cluster_role_binding" "tiller" {
