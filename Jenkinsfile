@@ -5,6 +5,7 @@ pipeline {
        TERRAFORM_HOME = tool name: 'terraform', type: 'com.cloudbees.jenkins.plugins.customtools.CustomTool'
        KUBECTL_HOME = tool name: 'kubectl', type: 'com.cloudbees.jenkins.plugins.customtools.CustomTool'
        AWS_IAM_AUTHENTICATOR_HOME = tool name: 'aws-iam-authenticator', type: 'com.cloudbees.jenkins.plugins.customtools.CustomTool'
+       HELM_HOME = tool name: 'helm', type: 'com.cloudbees.jenkins.plugins.customtools.CustomTool'
     }   
     options {
         disableConcurrentBuilds()
@@ -64,6 +65,8 @@ pipeline {
                     wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']) {
                         dir ("provisioning") { 
                             echo " =========== ^^^^^^^^^^^^ Using AWS Credential : ${credential}"
+                            sh 'helm version'
+                            sh 'helm init --client-ony'
 			                sh 'rm -rf .terraform'
                             sh '${TERRAFORM_HOME}/terraform version'
                             sh '${TERRAFORM_HOME}/terraform init -backend-config="bucket=${bucket}" -backend-config="key=${cluster}/terraform.tfstate" -backend-config="region=${region}"'
