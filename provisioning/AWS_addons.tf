@@ -88,4 +88,7 @@ resource "helm_release" "mydatabase" {
     name  = "mardiadbPassword"
     value = "qux"
   }
+  depends_on = [
+    "kubernetes_cluster_role_binding.tiller",
+  ]
 }
