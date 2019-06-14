@@ -1,3 +1,10 @@
+resource "null_resource" "k8s-tiller-rbac" {
+  depends_on = ["module.eks"]
+
+  triggers {
+    kube_config_rendered = "${module.eks.kubeconfig}"
+  }
+}
 data "aws_eks_cluster_auth" "cluster-auth" {
   depends_on = ["module.eks", "null_resource.k8s-tiller-rbac"]
   name       = "${module.eks.cluster_id}"
