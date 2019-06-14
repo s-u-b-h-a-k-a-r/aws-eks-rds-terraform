@@ -8,7 +8,7 @@ resource "null_resource" "k8s-tiller-rbac" {
 
 data "aws_eks_cluster_auth" "cluster-auth" {
   depends_on = ["module.eks", "null_resource.k8s-tiller-rbac"]
-  name       = "${var.EKS_name}"
+  name       = "${module.eks.cluster_id}"
 }
 
 provider "kubernetes" {
