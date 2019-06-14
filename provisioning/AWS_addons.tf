@@ -1,24 +1,30 @@
+resource "null_resource" "k8s-tiller-rbac" {
+  depends_on = ["module.eks"]
+
+  triggers {
+    kube_config_rendered = "${module.eks.kubeconfig}"
+  }
+}
+
 data "aws_eks_cluster" "cluster" {
   depends_on = ["module.eks"]
   name       = "${var.EKS_name}"
 }
 
 data "aws_eks_cluster_auth" "cluster-auth" {
-  depends_on = ["module.eks"]
+  depends_on = ["module.eks", "null_resource.k8s-tiller-rbac"]
   name       = "${var.EKS_name}"
 }
 
 provider "kubernetes" {
-  host                   = "${aws_eks_cluster.cluster.endpoint}"
-  cluster_ca_certificate = "${base64decode(aws_eks_cluster.cluster.certificate_authority.0.data)}"
-  token                  = "${data.aws_eks_cluster_auth.this.token}"
-  load_config_file       = false
-  version                = "~> 1.5"
+  host                   = "${data.aws_eks_cluster.cluster.endpoint}"
+  cluster_ca_certificate = "${base64decode(data.aws_eks_cluster.cluster.certificate_authority.0.data)}"
+  token                  = "${data.aws_eks_cluster_auth.cluster-auth.token}"
 }
 
 provider "helm" {
   install_tiller  = true
-  tiller_image    = "gcr.io/kubernetes-helm/tiller:v2.14.1"
+  tiller_image    = "gcr.io/kubernetes-helm/tiller:v2.14.0"
   service_account = "${kubernetes_service_account.tiller.metadata.0.name}"
   namespace       = "${kubernetes_service_account.tiller.metadata.0.namespace}"
 
@@ -26,7 +32,6 @@ provider "helm" {
     host                   = "${data.aws_eks_cluster.cluster.endpoint}"
     cluster_ca_certificate = "${base64decode(data.aws_eks_cluster.cluster.certificate_authority.0.data)}"
     token                  = "${data.aws_eks_cluster_auth.cluster-auth.token}"
-    load_config_file       = false
   }
 }
 
@@ -37,7 +42,7 @@ resource "kubernetes_service_account" "tiller" {
   }
 
   automount_service_account_token = true
-  depends_on                      = ["module.eks"]
+  depends_on                      = ["module.eks", "null_resource.k8s-tiller-rbac"]
 }
 
 resource "kubernetes_cluster_role_binding" "tiller" {
@@ -63,11 +68,13 @@ resource "kubernetes_cluster_role_binding" "tiller" {
 }
 
 data "helm_repository" "incubator" {
-  name = "incubator"
-  url  = "https://kubernetes-charts-incubator.storage.googleapis.com"
+  name       = "incubator"
+  url        = "https://kubernetes-charts-incubator.storage.googleapis.com"
+  depends_on = ["kubernetes_service_account.tiller", "kubernetes_cluster_role_binding.tiller"]
 }
 
 data "helm_repository" "stable" {
-  name = "stable"
-  url  = "https://kubernetes-charts.storage.googleapis.com/"
+  name       = "stable"
+  url        = "https://kubernetes-charts.storage.googleapis.com/"
+  depends_on = ["kubernetes_service_account.tiller", "kubernetes_cluster_role_binding.tiller"]
 }
