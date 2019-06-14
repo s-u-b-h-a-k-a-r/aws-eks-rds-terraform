@@ -32,7 +32,6 @@ resource "kubernetes_service_account" "tiller" {
 
   automount_service_account_token = true
   depends_on                      = ["module.eks"]
-
   lifecycle {
     prevent_destroy = true
   }
@@ -58,10 +57,6 @@ resource "kubernetes_cluster_role_binding" "tiller" {
   depends_on = [
     "kubernetes_service_account.tiller",
   ]
-
-  lifecycle {
-    prevent_destroy = true
-  }
 }
 
 data "helm_repository" "incubator" {
@@ -90,7 +85,7 @@ resource "helm_release" "mydatabase" {
     value = "qux"
   }
 
-  lifecycle {
-    prevent_destroy = true
-  }
+  depends_on = [
+    "kubernetes_service_account.tiller",
+  ]
 }
