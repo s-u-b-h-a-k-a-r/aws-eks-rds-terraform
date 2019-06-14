@@ -78,3 +78,18 @@ data "helm_repository" "stable" {
   url        = "https://kubernetes-charts.storage.googleapis.com/"
   depends_on = ["kubernetes_service_account.tiller", "kubernetes_cluster_role_binding.tiller"]
 }
+
+resource "helm_release" "mydatabase" {
+  name  = "mydatabase"
+  chart = "stable/mariadb"
+
+  set {
+    name  = "mariadbUser"
+    value = "foo"
+  }
+
+  set {
+    name  = "mardiadbPassword"
+    value = "qux"
+  }
+}
