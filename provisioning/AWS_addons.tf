@@ -17,15 +17,16 @@ provider "kubernetes" {
 }
 
 provider "helm" {
-  namespace       = "kube-system"
   install_tiller  = true
   tiller_image    = "gcr.io/kubernetes-helm/tiller:v2.14.1"
-  service_account = "tiller"
+  service_account = "${kubernetes_service_account.tiller.metadata.0.name}"
+  namespace       = "${kubernetes_service_account.tiller.metadata.0.namespace}"
 
   kubernetes {
     host                   = "${data.aws_eks_cluster.cluster.endpoint}"
     cluster_ca_certificate = "${base64decode(data.aws_eks_cluster.cluster.certificate_authority.0.data)}"
     token                  = "${data.aws_eks_cluster_auth.cluster-auth.token}"
+    load_config_file       = false
   }
 }
 
