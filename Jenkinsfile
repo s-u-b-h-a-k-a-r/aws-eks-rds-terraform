@@ -196,7 +196,7 @@ pipeline {
                     withCredentials([[$class: 'AmazonWebServicesCredentialsBinding',credentialsId: params.credential,accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY' ]]) {
                     wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']) {
                         dir ("provisioning") {
-                            sh '${TERRAFORM_HOME}/output kubeconfig > ~/.kube/config'
+                            sh '${TERRAFORM_HOME}/terraform output kubeconfig > ~/.kube/config'
                             sh '${TERRAFORM_HOME}/terraform destroy -var EKS_name=${cluster} -force'
                         }
                     }
