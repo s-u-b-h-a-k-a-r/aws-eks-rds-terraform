@@ -1,10 +1,3 @@
-resource "null_resource" "k8s-tiller-rbac" {
-  depends_on = ["module.eks"]
-
-  triggers {
-    kube_config_rendered = "${module.eks.kubeconfig}"
-  }
-}
 data "aws_eks_cluster_auth" "cluster-auth" {
   depends_on = ["module.eks", "null_resource.k8s-tiller-rbac"]
   name       = "${module.eks.cluster_id}"
@@ -14,7 +7,7 @@ provider "kubernetes" {
   host                   = "${module.eks.cluster_endpoint}"
   cluster_ca_certificate = "${base64decode(module.eks.cluster_certificate_authority_data)}"
   token                  = "${data.aws_eks_cluster_auth.cluster-auth.token}"
-  config_path            = "./${var.EKS_name}_kubeconfig"
+  load_config_file       = false
 }
 
 provider "helm" {
@@ -27,7 +20,7 @@ provider "helm" {
     host                   = "${module.eks.cluster_endpoint}"
     cluster_ca_certificate = "${base64decode(module.eks.cluster_certificate_authority_data)}"
     token                  = "${data.aws_eks_cluster_auth.cluster-auth.token}"
-    config_path            = "./${var.EKS_name}_kubeconfig"
+    load_config_file       = false
   }
 }
 
@@ -39,6 +32,10 @@ resource "kubernetes_service_account" "tiller" {
 
   automount_service_account_token = true
   depends_on                      = ["module.eks"]
+
+  lifecycle {
+    prevent_destroy = true
+  }
 }
 
 resource "kubernetes_cluster_role_binding" "tiller" {
@@ -61,6 +58,10 @@ resource "kubernetes_cluster_role_binding" "tiller" {
   depends_on = [
     "kubernetes_service_account.tiller",
   ]
+
+  lifecycle {
+    prevent_destroy = true
+  }
 }
 
 data "helm_repository" "incubator" {
@@ -88,7 +89,8 @@ resource "helm_release" "mydatabase" {
     name  = "mardiadbPassword"
     value = "qux"
   }
-  depends_on = [
-    "kubernetes_cluster_role_binding.tiller",
-  ]
+
+  lifecycle {
+    prevent_destroy = true
+  }
 }
