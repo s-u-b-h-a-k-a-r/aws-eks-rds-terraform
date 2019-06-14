@@ -197,6 +197,8 @@ pipeline {
                     wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']) {
                         dir ("provisioning") {
                             sh '${TERRAFORM_HOME}/terraform output kubeconfig > ~/.kube/config'
+                            sh '${TERRAFORM_HOME}/terraform destroy -var EKS_name=${cluster} -force -target=module.eks'
+                            sh '${TERRAFORM_HOME}/terraform destroy -var EKS_name=${cluster} -force -target=module.vpc'
                             sh '${TERRAFORM_HOME}/terraform destroy -var EKS_name=${cluster} -force'
                         }
                     }
