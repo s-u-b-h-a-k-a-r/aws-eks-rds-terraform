@@ -6,19 +6,14 @@ resource "null_resource" "k8s-tiller-rbac" {
   }
 }
 
-data "aws_eks_cluster" "cluster" {
-  depends_on = ["module.eks"]
-  name       = "${var.EKS_name}"
-}
-
 data "aws_eks_cluster_auth" "cluster-auth" {
   depends_on = ["module.eks", "null_resource.k8s-tiller-rbac"]
   name       = "${var.EKS_name}"
 }
 
 provider "kubernetes" {
-  host                   = "${data.aws_eks_cluster.cluster.endpoint}"
-  cluster_ca_certificate = "${base64decode(data.aws_eks_cluster.cluster.certificate_authority.0.data)}"
+  host                   = "${module.eks.cluster_endpoint}"
+  cluster_ca_certificate = "${base64decode(module.eks.cluster_certificate_authority_data)}"
   token                  = "${data.aws_eks_cluster_auth.cluster-auth.token}"
   config_path            = "./${var.EKS_name}_kubeconfig"
 }
@@ -30,8 +25,8 @@ provider "helm" {
   namespace       = "${kubernetes_service_account.tiller.metadata.0.namespace}"
 
   kubernetes {
-    host                   = "${data.aws_eks_cluster.cluster.endpoint}"
-    cluster_ca_certificate = "${base64decode(data.aws_eks_cluster.cluster.certificate_authority.0.data)}"
+    host                   = "${module.eks.cluster_endpoint}"
+    cluster_ca_certificate = "${base64decode(module.eks.cluster_certificate_authority_data)}"
     token                  = "${data.aws_eks_cluster_auth.cluster-auth.token}"
     config_path            = "./${var.EKS_name}_kubeconfig"
   }
