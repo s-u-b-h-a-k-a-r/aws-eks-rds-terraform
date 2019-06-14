@@ -1,11 +1,3 @@
-resource "null_resource" "k8s-tiller-rbac" {
-  depends_on = ["module.eks"]
-
-  triggers {
-    kube_config_rendered = "${module.eks.kubeconfig}"
-  }
-}
-
 data "aws_eks_cluster_auth" "cluster-auth" {
   depends_on = ["module.eks", "null_resource.k8s-tiller-rbac"]
   name       = "${module.eks.cluster_id}"
@@ -39,7 +31,7 @@ resource "kubernetes_service_account" "tiller" {
   }
 
   automount_service_account_token = true
-  depends_on                      = ["module.eks", "null_resource.k8s-tiller-rbac"]
+  depends_on                      = ["module.eks"]
 }
 
 resource "kubernetes_cluster_role_binding" "tiller" {
