@@ -149,7 +149,6 @@ pipeline {
                     wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']) {
                         dir ("provisioning") {
                                sh '${TERRAFORM_HOME}/terraform output kubeconfig > ./${cluster}_kubeconfig'
-                               sh 'export KUBECONFIG=./${cluster}_kubeconfig'
                                sh 'kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v1.10.1/src/deploy/recommended/kubernetes-dashboard.yaml --kubeconfig=./${cluster}_kubeconfig'
                                sh 'kubectl apply -f eks-admin-service-account.yaml --kubeconfig=./${cluster}_kubeconfig'
                         }
@@ -196,7 +195,6 @@ pipeline {
                     withCredentials([[$class: 'AmazonWebServicesCredentialsBinding',credentialsId: params.credential,accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY' ]]) {
                     wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']) {
                         dir ("provisioning") {
-                            sh '${TERRAFORM_HOME}/terraform output kubeconfig > ~/.kube/config'
                             sh '${TERRAFORM_HOME}/terraform destroy -var EKS_name=${cluster} -force'
                         }
                     }
