@@ -29,12 +29,12 @@ spec:
             choices: ['master' , 'dev' , 'qa', 'staging'],
             description: 'Choose branch to build and deploy',
             name: 'branch')
-        string(name: 'credential', defaultValue : 'kotts1-aws', description: "Provide your  AWS Credential ID from Global credentials")
-        string(name: 'bucket', defaultValue : 'subhakar-state-bucket', description: "Existing S3 bucket name to store <.tfstate> file.")
-        string(name: 'region', defaultValue : 'us-west-2', description: "Region name where the bucket resides.")
-        string(name: 'cluster', defaultValue : 'demo-cloud', description: "Unique EKS Cluster name [non existing cluster in case of new].")
-        text(name: 'parameters', defaultValue : '', description: "Provide all the parameters by visiting the below github link https://github.com/SubhakarKotta/aws-eks-rds-terraform/blob/master/provisioning/terraform.tfvars  Make sure you update the values as per your requirements  Provide unique values for the below parameters  AWS_vpc_name|AWS_rds_identifier by appending  (cluster name) E.g.  cluster: {demo-cluster}  AWS_vpc_name: {demo-cluster-vpc} AWS_rds_identifier : {demo-cluster} ")
-        string(name: 'state', defaultValue : '', description: "Provide the json path to remove state")      }
+        string(name: 'credential', defaultValue : '<YOUR_CREDENTIAL>', description: "Provide your  AWS Credential ID from Global credentials")
+        string(name: 'bucket', defaultValue : '<YOUR_BUCKET_NAME>', description: "Existing S3 bucket name to store <.tfstate> file.")
+        string(name: 'region', defaultValue : '<YOUR_REGION>', description: "Region name where the bucket resides.")
+        string(name: 'cluster', defaultValue : '<YOUR_CLUSTER>', description: "Unique EKS Cluster name [non existing cluster in case of new].")
+        text(name: 'parameters', defaultValue : '<YOUR_TERRAFORM_TFVARS>', description: "Provide all the parameters by visiting the below github link https://github.com/SubhakarKotta/aws-eks-rds-terraform/provisioning/terraform.tfvars.template  Make sure you update the values as per your requirements.  Provide unique values for the parameters  AWS_vpc_name|AWS_rds_identifier by appending  (cluster name) E.g.  cluster: {subhakar-demo-cluster}  AWS_vpc_name: {subhakar-demo-cluster-vpc} AWS_rds_identifier : {subhakar-demo-cluster} ")
+        string(name: 'state', defaultValue : '<YOUR_JSON_PATH>', description: "Provide the json path to remove state")      }
 
     environment {
        PLAN_NAME= "${cluster}-eks-terraform-plan"
@@ -121,7 +121,7 @@ spec:
                      withCredentials([[$class: 'AmazonWebServicesCredentialsBinding',credentialsId: params.credential,accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY' ]]) {
                          wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']) {
                              dir ("provisioning") { 
-                                 sh 'terraform validate -var  name=${cluster} --var-file=${TFVARS_FILE_NAME}'
+                                 sh 'terraform validate -var  EKS_name=${cluster} --var-file=${TFVARS_FILE_NAME}'
                              }
                          }
                      }
@@ -137,7 +137,7 @@ spec:
                     withCredentials([[$class: 'AmazonWebServicesCredentialsBinding',credentialsId: params.credential,accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY' ]]) {
                         wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']) {
                             dir ("provisioning") {
-                                sh 'terraform plan -var name=$cluster --var-file=${TFVARS_FILE_NAME}'
+                                sh 'terraform plan -var EKS_name=$cluster --var-file=${TFVARS_FILE_NAME}'
                              }
                          }
                      }
@@ -153,7 +153,7 @@ spec:
                      withCredentials([[$class: 'AmazonWebServicesCredentialsBinding',credentialsId: params.credential,accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY' ]]) {
                          wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']) {
                               dir ("provisioning") {
-                                 sh 'terraform plan  -var name=$cluster --var-file=${TFVARS_FILE_NAME}  -out=${PLAN_NAME}'
+                                 sh 'terraform plan  -var EKS_name=$cluster --var-file=${TFVARS_FILE_NAME}  -out=${PLAN_NAME}'
                                  sh 'terraform apply  -auto-approve ${PLAN_NAME}'
                                 }
                         }
