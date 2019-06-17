@@ -34,7 +34,8 @@ spec:
         string(name: 'region', defaultValue : '<YOUR_REGION>', description: "Region name where the bucket resides.")
         string(name: 'cluster', defaultValue : '<YOUR_CLUSTER>', description: "Unique EKS Cluster name [non existing cluster in case of new].")
         text(name: 'parameters', defaultValue : '<YOUR_TERRAFORM_TFVARS>', description: "Provide all the parameters by visiting the below github link https://github.com/SubhakarKotta/aws-eks-rds-terraform/provisioning/terraform.tfvars.template  Make sure you update the values as per your requirements.  Provide unique values for the parameters  AWS_vpc_name|AWS_rds_identifier by appending  (cluster name) E.g.  cluster: {subhakar-demo-cluster}  AWS_vpc_name: {subhakar-demo-cluster-vpc} AWS_rds_identifier : {subhakar-demo-cluster} ")
-        string(name: 'state', defaultValue : '<YOUR_JSON_PATH>', description: "Provide the json path to remove state")      }
+        string(name: 'state', defaultValue : '<YOUR_JSON_PATH>', description: "Provide the json path to remove state")
+    }
 
     environment {
        PLAN_NAME= "${cluster}-eks-terraform-plan"
@@ -186,7 +187,7 @@ spec:
                        withCredentials([[$class: 'AmazonWebServicesCredentialsBinding',credentialsId: params.credential,accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY' ]]) {
                            wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']) {
                                dir ("provisioning") {
-                                 sh 'terraform plan -destroy -var EKS_name=${cluster}'
+                                 sh 'terraform plan -destroy -var EKS_name=${cluster} --var-file=${TFVARS_FILE_NAME}'
                                }
                            }
                         }
@@ -202,7 +203,7 @@ spec:
                      withCredentials([[$class: 'AmazonWebServicesCredentialsBinding',credentialsId: params.credential,accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY' ]]) {
                          wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']) {
                               dir ("provisioning") {
-                                   sh 'terraform destroy -var EKS_name=${cluster} -force'
+                                   sh 'terraform destroy -var EKS_name=${cluster} --var-file=${TFVARS_FILE_NAME} -force'
                                }
                          }
                      }
