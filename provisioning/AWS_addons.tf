@@ -7,7 +7,7 @@ provider "kubernetes" {
   host                   = "${module.eks.cluster_endpoint}"
   cluster_ca_certificate = "${base64decode(module.eks.cluster_certificate_authority_data)}"
   token                  = "${data.aws_eks_cluster_auth.cluster-auth.token}"
-  load_config_file       = true
+  load_config_file       = false
 }
 
 resource "kubernetes_service_account" "tiller" {
@@ -16,6 +16,7 @@ resource "kubernetes_service_account" "tiller" {
     namespace = "kube-system"
   }
   automount_service_account_token = true
+   depends_on = ["module.eks"]
 }
 
 resource "kubernetes_cluster_role_binding" "tiller" {
@@ -50,7 +51,7 @@ provider "helm" {
     host                   = "${module.eks.cluster_endpoint}"
     cluster_ca_certificate = "${base64decode(module.eks.cluster_certificate_authority_data)}"
     token                  = "${data.aws_eks_cluster_auth.cluster-auth.token}"
-    load_config_file       = true
+     load_config_file       = false    
   }
 }
 data "helm_repository" "incubator" {
