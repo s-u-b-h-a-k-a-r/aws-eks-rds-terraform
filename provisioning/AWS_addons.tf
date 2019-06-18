@@ -2,9 +2,6 @@
 resource "null_resource" "k8s-tiller-rbac" {
   depends_on = ["module.eks"]
 
-  provisioner "local-exec" {
-  }
-
   triggers {
     kube_config_rendered = "${module.eks.kubeconfig}"
   }
