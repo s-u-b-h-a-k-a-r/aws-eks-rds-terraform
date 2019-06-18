@@ -9,16 +9,36 @@ provider "kubernetes" {
   load_config_file       = false
 }
 
-resource "kubernetes_storage_class" "io1" {
+resource "kubernetes_service_account" "tiller" {
   metadata {
-    name = "io1"
+    name      = "tiller"
+    namespace = "kube-system"
   }
 
-  storage_provisioner = "kubernetes.io/aws-ebs"
-  reclaim_policy      = "Retain"
-
-  parameters {
-    type   = "io1"
-    fsType = "ext4"
+  automount_service_account_token = true
+  lifecycle {
+    prevent_destroy = true
   }
+}
+
+resource "kubernetes_cluster_role_binding" "tiller" {
+  metadata {
+    name = "tiller"
+  }
+
+  role_ref {
+    api_group = "rbac.authorization.k8s.io"
+    kind      = "ClusterRole"
+    name      = "cluster-admin"
+  }
+
+  subject {
+    kind      = "ServiceAccount"
+    name      = "tiller"
+    namespace = "kube-system"
+  }
+
+  depends_on = [
+    "kubernetes_service_account.tiller",
+  ]
 }
