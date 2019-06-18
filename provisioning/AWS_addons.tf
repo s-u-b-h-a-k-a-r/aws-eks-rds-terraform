@@ -4,10 +4,7 @@ data "aws_eks_cluster_auth" "cluster-auth" {
 }
 
 provider "kubernetes" {
-  host                   = "${module.eks.cluster_endpoint}"
-  cluster_ca_certificate = "${base64decode(module.eks.cluster_certificate_authority_data)}"
-  token                  = "${data.aws_eks_cluster_auth.cluster-auth.token}"
-  load_config_file       = false
+  load_config_file = true
 }
 
 resource "kubernetes_service_account" "tiller" {
@@ -15,8 +12,9 @@ resource "kubernetes_service_account" "tiller" {
     name      = "tiller"
     namespace = "kube-system"
   }
+
   automount_service_account_token = true
-   depends_on = ["module.eks"]
+  depends_on                      = ["module.eks"]
 }
 
 resource "kubernetes_cluster_role_binding" "tiller" {
@@ -48,12 +46,10 @@ provider "helm" {
   namespace       = "${kubernetes_service_account.tiller.metadata.0.namespace}"
 
   kubernetes {
-    host                   = "${module.eks.cluster_endpoint}"
-    cluster_ca_certificate = "${base64decode(module.eks.cluster_certificate_authority_data)}"
-    token                  = "${data.aws_eks_cluster_auth.cluster-auth.token}"
-     load_config_file       = false    
+    load_config_file = true
   }
 }
+
 data "helm_repository" "incubator" {
   name       = "incubator"
   url        = "https://kubernetes-charts-incubator.storage.googleapis.com"
