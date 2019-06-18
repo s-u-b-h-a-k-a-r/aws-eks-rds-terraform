@@ -1,11 +1,9 @@
-
 resource "null_resource" "k8s-tiller-rbac" {
   depends_on = ["module.eks"]
 
   provisioner "local-exec" {
-
     command = <<EOS
-      echo "${module.eks.kubeconfig}" > ~/.kube/config
+      echo "${module.eks.kubeconfig}" > ./kubeconfig_${module.eks.cluster_id}
 EOS
   }
 
@@ -15,8 +13,8 @@ EOS
 }
 
 provider "kubernetes" {
-  load_config_file       = true
-  config_path = "./kubeconfig_demo-cloud"
+  load_config_file = true
+  config_path      = "./kubeconfig_${module.eks.cluster_id}"
 }
 
 resource "kubernetes_service_account" "tiller" {
@@ -24,8 +22,9 @@ resource "kubernetes_service_account" "tiller" {
     name      = "tiller"
     namespace = "kube-system"
   }
+
   automount_service_account_token = true
-   depends_on = ["module.eks"]
+  depends_on                      = ["module.eks"]
 }
 
 resource "kubernetes_cluster_role_binding" "tiller" {
@@ -57,10 +56,11 @@ provider "helm" {
   namespace       = "${kubernetes_service_account.tiller.metadata.0.namespace}"
 
   kubernetes {
-    load_config_file       = true
-    config_path = "./kubeconfig_demo-cloud"
+    load_config_file = true
+    config_path      = "./kubeconfig__${module.eks.cluster_id}"
   }
 }
+
 data "helm_repository" "incubator" {
   name       = "incubator"
   url        = "https://kubernetes-charts-incubator.storage.googleapis.com"
