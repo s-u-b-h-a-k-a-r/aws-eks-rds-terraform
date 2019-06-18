@@ -39,3 +39,48 @@ resource "kubernetes_cluster_role_binding" "tiller" {
     "kubernetes_service_account.tiller",
   ]
 }
+
+provider "helm" {
+  install_tiller  = true
+  tiller_image    = "gcr.io/kubernetes-helm/tiller:v2.14.1"
+  service_account = "${kubernetes_service_account.tiller.metadata.0.name}"
+  namespace       = "${kubernetes_service_account.tiller.metadata.0.namespace}"
+
+  kubernetes {
+    host                   = "${module.eks.cluster_endpoint}"
+    cluster_ca_certificate = "${base64decode(module.eks.cluster_certificate_authority_data)}"
+    token                  = "${data.aws_eks_cluster_auth.cluster-auth.token}"
+    load_config_file       = false
+  }
+}
+
+data "helm_repository" "incubator" {
+  name       = "incubator"
+  url        = "https://kubernetes-charts-incubator.storage.googleapis.com"
+  depends_on = ["kubernetes_service_account.tiller", "kubernetes_cluster_role_binding.tiller"]
+}
+
+data "helm_repository" "stable" {
+  name       = "stable"
+  url        = "https://kubernetes-charts.storage.googleapis.com/"
+  depends_on = ["kubernetes_service_account.tiller", "kubernetes_cluster_role_binding.tiller"]
+}
+
+resource "helm_release" "mydatabase" {
+  name  = "mydatabase"
+  chart = "stable/mariadb"
+
+  set {
+    name  = "mariadbUser"
+    value = "foo"
+  }
+
+  set {
+    name  = "mardiadbPassword"
+    value = "qux"
+  }
+
+  depends_on = [
+    "kubernetes_service_account.tiller",
+  ]
+}
