@@ -1,21 +1,35 @@
 resource "null_resource" "k8s-tiller-rbac" {
   depends_on = ["module.eks"]
 
-  provisioner "local-exec" {
-    when    = "destroy"
-    command = <<EOS
-      echo "${module.eks.kubeconfig}" > ./kubeconfig_${module.eks.cluster_id}
-EOS
-  }
-
   triggers {
     kube_config_rendered = "${module.eks.kubeconfig}"
   }
 }
 
+data "aws_eks_cluster_auth" "cluster-auth" {
+  depends_on = ["module.eks", "null_resource.k8s-tiller-rbac"]
+  name       = "${module.eks.cluster_id}"
+}
+
 provider "kubernetes" {
-  load_config_file = true
-  config_path      = "./kubeconfig_${module.eks.cluster_id}"
+  host                   = "${module.eks.cluster_endpoint}"
+  cluster_ca_certificate = "${base64decode(module.eks.cluster_certificate_authority_data)}"
+  token                  = "${data.aws_eks_cluster_auth.cluster-auth.token}"
+  load_config_file       = false
+}
+
+provider "helm" {
+  install_tiller  = true
+  tiller_image    = "gcr.io/kubernetes-helm/tiller:v2.14.0"
+  service_account = "${kubernetes_service_account.tiller.metadata.0.name}"
+  namespace       = "${kubernetes_service_account.tiller.metadata.0.namespace}"
+
+  kubernetes {
+    host                   = "${module.eks.cluster_endpoint}"
+    cluster_ca_certificate = "${base64decode(module.eks.cluster_certificate_authority_data)}"
+    token                  = "${data.aws_eks_cluster_auth.cluster-auth.token}"
+    load_config_file       = false
+  }
 }
 
 resource "kubernetes_service_account" "tiller" {
@@ -25,7 +39,7 @@ resource "kubernetes_service_account" "tiller" {
   }
 
   automount_service_account_token = true
-  depends_on                      = ["module.eks"]
+  depends_on                      = ["module.eks", "null_resource.k8s-tiller-rbac"]
 }
 
 resource "kubernetes_cluster_role_binding" "tiller" {
@@ -48,18 +62,6 @@ resource "kubernetes_cluster_role_binding" "tiller" {
   depends_on = [
     "kubernetes_service_account.tiller",
   ]
-}
-
-provider "helm" {
-  install_tiller  = true
-  tiller_image    = "gcr.io/kubernetes-helm/tiller:v2.14.0"
-  service_account = "${kubernetes_service_account.tiller.metadata.0.name}"
-  namespace       = "${kubernetes_service_account.tiller.metadata.0.namespace}"
-
-  kubernetes {
-    load_config_file = true
-    config_path      = "./kubeconfig_${module.eks.cluster_id}"
-  }
 }
 
 data "helm_repository" "incubator" {
@@ -87,8 +89,4 @@ resource "helm_release" "mydatabase" {
     name  = "mardiadbPassword"
     value = "qux"
   }
-
-  depends_on = [
-    "kubernetes_cluster_role_binding.tiller",
-  ]
 }
