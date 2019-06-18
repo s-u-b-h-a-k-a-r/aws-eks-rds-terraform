@@ -2,6 +2,7 @@ resource "null_resource" "k8s-tiller-rbac" {
   depends_on = ["module.eks"]
 
   provisioner "local-exec" {
+    when    = "destroy"
     command = <<EOS
       echo "${module.eks.kubeconfig}" > ./kubeconfig_${module.eks.cluster_id}
 EOS
