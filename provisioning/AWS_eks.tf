@@ -11,4 +11,6 @@ module "eks" {
   worker_groups      = "${var.EKS_worker_groups}"
   worker_group_count = "1"
   manage_aws_auth = false
+  cluster_delete_timeout = "30m"
+  cluster_create_timeout = "30m"
 }
