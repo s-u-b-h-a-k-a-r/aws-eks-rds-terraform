@@ -12,4 +12,6 @@ module "eks" {
   worker_group_count = "1"
   cluster_delete_timeout = "30m"
   cluster_create_timeout = "30m"
+  write_kubeconfig = true
+  config_output_path = "~/.kube/config"
 }
