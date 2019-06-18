@@ -15,11 +15,7 @@ resource "kubernetes_service_account" "tiller" {
     name      = "tiller"
     namespace = "kube-system"
   }
-
   automount_service_account_token = true
-  depends_on = [
-    "kubernetes_config_map.aws_map_roles",
-  ]
 }
 
 resource "kubernetes_cluster_role_binding" "tiller" {
