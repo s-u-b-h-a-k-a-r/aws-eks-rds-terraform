@@ -10,4 +10,5 @@ module "eks" {
   vpc_id             = "${module.vpc.vpc_id}"
   worker_groups      = "${var.EKS_worker_groups}"
   worker_group_count = "1"
+  manage_aws_auth = false
 }
