@@ -16,7 +16,7 @@ EOS
 
 provider "kubernetes" {
   load_config_file       = true
-  config_path = "./kubeconfig_{module.eks.cluster_id}"
+  config_path = "./kubeconfig_demo-cloud"
 }
 
 resource "kubernetes_service_account" "tiller" {
@@ -58,7 +58,7 @@ provider "helm" {
 
   kubernetes {
     load_config_file       = true
-    config_path = "./kubeconfig_{module.eks.cluster_id}"
+    config_path = "./kubeconfig_demo-cloud"
   }
 }
 data "helm_repository" "incubator" {
