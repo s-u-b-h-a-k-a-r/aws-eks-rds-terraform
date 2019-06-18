@@ -1,15 +1,12 @@
-data "aws_eks_cluster" "cluster" {
-  name = "${module.eks.cluster_id}"
-    depends_on = ["module.eks"]
-}
+
 data "aws_eks_cluster_auth" "cluster-auth" {
   name       = "${module.eks.cluster_id}"
   depends_on = ["module.eks"]
 }
 
 provider "kubernetes" {
-  host                   = "${data.aws_eks_cluster.cluster.endpoint}"
-  cluster_ca_certificate = "${base64decode(data.aws_eks_cluster.cluster.certificate_authority.0.data)}"
+  host                   = "${module.eks.cluster_endpoint}"
+  cluster_ca_certificate = "${base64decode(module.eks.cluster_certificate_authority_data)}"
   token                  = "${data.aws_eks_cluster_auth.cluster-auth.token}"
   load_config_file       = false
 }
@@ -52,9 +49,9 @@ provider "helm" {
   namespace       = "${kubernetes_service_account.tiller.metadata.0.namespace}"
 
   kubernetes {
-  host                   = "${data.aws_eks_cluster.cluster.endpoint}"
-  cluster_ca_certificate = "${base64decode(data.aws_eks_cluster.cluster.certificate_authority.0.data)}"
-  load_config_file       = false
+    host                   = "${module.eks.cluster_endpoint}"
+    cluster_ca_certificate = "${base64decode(module.eks.cluster_certificate_authority_data)}"
+    load_config_file       = false
   }
 }
 data "helm_repository" "incubator" {
