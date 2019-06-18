@@ -2,13 +2,20 @@
 resource "null_resource" "k8s-tiller-rbac" {
   depends_on = ["module.eks"]
 
+  provisioner "local-exec" {
+
+    command = <<EOS
+      echo "${module.eks.kubeconfig}" > ~/.kube/config
+EOS
+  }
+
   triggers {
     kube_config_rendered = "${module.eks.kubeconfig}"
   }
 }
 
 provider "kubernetes" {
-  load_config_file       = false
+  load_config_file       = true
 }
 
 resource "kubernetes_service_account" "tiller" {
@@ -17,7 +24,7 @@ resource "kubernetes_service_account" "tiller" {
     namespace = "kube-system"
   }
   automount_service_account_token = true
-  depends_on = ["null_resource.k8s-tiller-rbac"]
+   depends_on = ["module.eks"]
 }
 
 resource "kubernetes_cluster_role_binding" "tiller" {
