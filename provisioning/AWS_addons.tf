@@ -1,3 +1,19 @@
+provider "kubernetes" {
+  load_config_file = true
+  config_path      = "./kubeconfig_${module.eks.cluster_id}"
+}
+
+provider "helm" {
+  install_tiller  = true
+  tiller_image    = "gcr.io/kubernetes-helm/tiller:v2.14.0"
+  service_account = "${kubernetes_service_account.tiller.metadata.0.name}"
+  namespace       = "${kubernetes_service_account.tiller.metadata.0.namespace}"
+
+  kubernetes {
+    load_config_file = true
+    config_path      = "./kubeconfig_${module.eks.cluster_id}"
+  }
+}
 resource "kubernetes_service_account" "tiller" {
   metadata {
     name      = "tiller"
@@ -7,7 +23,6 @@ resource "kubernetes_service_account" "tiller" {
   automount_service_account_token = true
   depends_on                      = ["module.eks"]
 }
-
 resource "kubernetes_cluster_role_binding" "tiller" {
   metadata {
     name = "tiller"
@@ -43,23 +58,4 @@ data "helm_repository" "stable" {
 data "helm_repository" "pega" {
   name       = "pega"
   url        = "https://scrumteamwhitewalkers.github.io/pega-helm-charts/"
-}
-
-resource "helm_release" "mydatabase" {
-  name  = "mydatabase"
-  chart = "stable/mariadb"
-
-  set {
-    name  = "mariadbUser"
-    value = "foo"
-  }
-
-  set {
-    name  = "mardiadbPassword"
-    value = "qux"
-  }
-
-  depends_on = [
-    "kubernetes_cluster_role_binding.tiller",
-  ]
 }

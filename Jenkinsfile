@@ -9,7 +9,7 @@ kind: Pod
 spec:
   containers:
   - name: jenkins-slave-terraform-kubectl-helm-awscli
-    image: subhakarkotta/terraform-kubectl-helm-awscli:0.11.14-v1.12.7-v2.14.1-1.16.179
+    image: subhakarkotta/terraform-kubectl-helm-awscli:0.11.14-v1.12.7-v2.13.1-1.16.179
     command: ['cat']
     tty: true
 """
@@ -71,35 +71,6 @@ spec:
                }
              }
          } 
-        stage('create-kubernetes-provider') {
-            when {
-                expression { params.action == 'create' }
-            }
-            steps {
-                container('jenkins-slave-terraform-kubectl-helm-awscli'){ 
-                      wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']) {
-                            dir ("provisioning") { 
-                                    sh 'rm -f AWS_addons_destroy.tf'
-                            } 
-                       }
-                 }
-             }
-         }
-        stage('destroy-kubernetes-provider') {
-            when {
-                expression { params.action == 'destroy' }
-            }
-            steps {
-                container('jenkins-slave-terraform-kubectl-helm-awscli'){ 
-                      wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']) {
-                            dir ("provisioning") { 
-                                    sh 'rm -f AWS_addons_create.tf'
-                            }
-                       }
-                 }
-             }
-         }
-
         stage('versions') {
             steps {
                 container('jenkins-slave-terraform-kubectl-helm-awscli'){ 
@@ -182,10 +153,13 @@ spec:
                 container('jenkins-slave-terraform-kubectl-helm-awscli'){ 
                      withCredentials([[$class: 'AmazonWebServicesCredentialsBinding',credentialsId: params.credential,accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY' ]]) {
                          wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']) {
-                              dir ("provisioning") {
-                                 sh 'terraform plan  -var EKS_name=$cluster --var-file=${TFVARS_FILE_NAME}  -out=${PLAN_NAME}'
-                                 sh 'terraform apply  -auto-approve ${PLAN_NAME}'
-                                }
+                             dir ("provisioning") {
+                                    sh 'terraform plan  -var EKS_name=$cluster --var-file=${TFVARS_FILE_NAME}  -out=${PLAN_NAME}'
+                                    sh 'terraform apply  -auto-approve ${PLAN_NAME} || true'
+
+                                    sh 'terraform plan  -var EKS_name=$cluster --var-file=${TFVARS_FILE_NAME}  -out=${PLAN_NAME}'
+                                    sh 'terraform apply  -auto-approve ${PLAN_NAME}'
+                             }
                         }
                     }
                  }
