@@ -1,6 +1,12 @@
+resource "local_file" "kubeconfig" {
+  depends_on = ["module.eks"]
+  content    = "${module.eks.kubeconfig}"
+  filename   = "./kubeconfig_${module.eks.cluster_id}"
+}
+
 provider "kubernetes" {
-  load_config_file       = true
-  config_path            = "./kubeconfig_${module.eks.cluster_id}"
+  load_config_file = true
+  config_path      = "${local_file.kubeconfig.filename}"
 }
 
 resource "kubernetes_service_account" "tiller" {
@@ -42,8 +48,8 @@ provider "helm" {
   namespace       = "${kubernetes_service_account.tiller.metadata.0.namespace}"
 
   kubernetes {
-    load_config_file       = true
-    config_path            = "./kubeconfig_${module.eks.cluster_id}"
+    load_config_file = true
+    config_path      = "${local_file.kubeconfig.filename}"
   }
 }
 
