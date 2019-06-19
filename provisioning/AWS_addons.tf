@@ -1,14 +1,3 @@
-resource "local_file" "kubeconfig" {
-  depends_on = ["module.eks"]
-  content    = "${module.eks.kubeconfig}"
-  filename   = "./kubeconfig_demo-cloud"
-}
-
-provider "kubernetes" {
-  load_config_file = true
-  config_path      = "${local_file.kubeconfig.filename}"
-}
-
 resource "kubernetes_service_account" "tiller" {
   metadata {
     name      = "tiller"
@@ -16,7 +5,7 @@ resource "kubernetes_service_account" "tiller" {
   }
 
   automount_service_account_token = true
-  depends_on = ["module.eks", "local_file.kubeconfig"]
+  depends_on                      = ["module.eks", "local_file.kubeconfig"]
 }
 
 resource "kubernetes_cluster_role_binding" "tiller" {
@@ -39,18 +28,6 @@ resource "kubernetes_cluster_role_binding" "tiller" {
   depends_on = [
     "kubernetes_service_account.tiller",
   ]
-}
-
-provider "helm" {
-  install_tiller  = true
-  tiller_image    = "gcr.io/kubernetes-helm/tiller:v2.14.0"
-  service_account = "${kubernetes_service_account.tiller.metadata.0.name}"
-  namespace       = "${kubernetes_service_account.tiller.metadata.0.namespace}"
-
-  kubernetes {
-    load_config_file = true
-    config_path      = "${local_file.kubeconfig.filename}"
-  }
 }
 
 data "helm_repository" "incubator" {
