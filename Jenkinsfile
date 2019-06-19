@@ -71,6 +71,35 @@ spec:
                }
              }
          } 
+        stage('create-kubernetes-provider') {
+            when {
+                expression { params.action == 'create' }
+            }
+            steps {
+                container('jenkins-slave-terraform-kubectl-helm-awscli'){ 
+                      wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']) {
+                            dir ("provisioning") { 
+                                    sh 'rm -f AWS_addons_destroy.tf'
+                            } 
+                       }
+                 }
+             }
+         }
+        stage('destroy-kubernetes-provider') {
+            when {
+                expression { params.action == 'destroy' }
+            }
+            steps {
+                container('jenkins-slave-terraform-kubectl-helm-awscli'){ 
+                      wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']) {
+                            dir ("provisioning") { 
+                                    sh 'rm -f AWS_addons_create.tf'
+                            }
+                       }
+                 }
+             }
+         }
+
         stage('versions') {
             steps {
                 container('jenkins-slave-terraform-kubectl-helm-awscli'){ 
