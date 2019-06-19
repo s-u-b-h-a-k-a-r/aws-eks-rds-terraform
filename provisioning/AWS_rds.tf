@@ -30,7 +30,6 @@ resource "aws_security_group_rule" "allow-workers-nodes-communications" {
 # DB
 #####
 module "db" {
-  version = "v1.28.0"
 
   source = "terraform-aws-modules/rds/aws"
 
