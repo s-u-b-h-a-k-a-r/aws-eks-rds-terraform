@@ -1,11 +1,10 @@
 resource "local_file" "kubeconfig" {
   depends_on = ["module.eks"]
   content    = "${module.eks.kubeconfig}"
-  filename   = "./kubeconfig_${module.eks.cluster_id}"
+  filename   = "./kubeconfig_demo-cloud"
 }
 
 provider "kubernetes" {
-  count = 0
   load_config_file = true
   config_path      = "${local_file.kubeconfig.filename}"
 }
