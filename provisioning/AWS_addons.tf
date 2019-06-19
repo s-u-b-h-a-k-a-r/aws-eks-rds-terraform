@@ -1,5 +1,18 @@
-resource "null_resource" "wait-for-eks" {
+resource "null_resource" "k8s-tiller-rbac" {
   depends_on = ["module.eks"]
+
+  provisioner "local-exec" {
+    working_dir = "${path.module}"
+
+    command = <<EOS
+for i in `seq 1 10`; do \
+echo "${module.eks.kubeconfig}" > kube_config.yaml & \
+kubectl apply -f files/tiller-rbac.yaml --kubeconfig kube_config.yaml && break || \
+sleep 10; \
+done; \
+rm kube_config.yaml;
+EOS
+  }
 
   triggers {
     kube_config_rendered = "${module.eks.kubeconfig}"
@@ -8,65 +21,25 @@ resource "null_resource" "wait-for-eks" {
 
 data "aws_eks_cluster" "cluster" {
   depends_on = ["module.eks"]
-  name       = "${module.eks.cluster_id}"
+  name       = "${local.eks_cluster_name}"
 }
 
 data "aws_eks_cluster_auth" "cluster-auth" {
-  depends_on = ["module.eks", "null_resource.wait-for-eks"]
-  name       = "${module.eks.cluster_id}"
-}
-
-provider "kubernetes" {
-  host                   = "${data.aws_eks_cluster.cluster.endpoint}"
-  cluster_ca_certificate = "${base64decode(data.aws_eks_cluster.cluster.certificate_authority.0.data)}"
-  token                  = "${data.aws_eks_cluster_auth.cluster-auth.token}"
-  config_path            = "./kubeconfig_${module.eks.cluster_id}"
+  depends_on = ["module.eks", "null_resource.k8s-tiller-rbac"]
+  name       = "${local.eks_cluster_name}"
 }
 
 provider "helm" {
+  namespace       = "kube-system"
   install_tiller  = true
-  tiller_image    = "gcr.io/kubernetes-helm/tiller:v2.14.1"
-  service_account = "${kubernetes_service_account.tiller.metadata.0.name}"
-  namespace       = "${kubernetes_service_account.tiller.metadata.0.namespace}"
+  tiller_image    = "gcr.io/kubernetes-helm/tiller:v2.14.0"
+  service_account = "tiller"
 
   kubernetes {
     host                   = "${data.aws_eks_cluster.cluster.endpoint}"
     cluster_ca_certificate = "${base64decode(data.aws_eks_cluster.cluster.certificate_authority.0.data)}"
     token                  = "${data.aws_eks_cluster_auth.cluster-auth.token}"
-    config_path            = "./kubeconfig_${module.eks.cluster_id}"
   }
-}
-
-resource "kubernetes_service_account" "tiller" {
-  metadata {
-    name      = "tiller"
-    namespace = "kube-system"
-  }
-
-  automount_service_account_token = true
-  depends_on                      = ["null_resource.wait-for-eks"]
-}
-
-resource "kubernetes_cluster_role_binding" "tiller" {
-  metadata {
-    name = "tiller"
-  }
-
-  role_ref {
-    api_group = "rbac.authorization.k8s.io"
-    kind      = "ClusterRole"
-    name      = "cluster-admin"
-  }
-
-  subject {
-    kind      = "ServiceAccount"
-    name      = "tiller"
-    namespace = "kube-system"
-  }
-
-  depends_on = [
-    "kubernetes_service_account.tiller",
-  ]
 }
 
 data "helm_repository" "incubator" {
