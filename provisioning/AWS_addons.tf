@@ -6,6 +6,37 @@ resource "null_resource" "wait-for-eks" {
   }
 }
 
+data "aws_eks_cluster" "cluster" {
+  depends_on = ["module.eks"]
+  name       = "${module.eks.cluster_id}"
+}
+
+data "aws_eks_cluster_auth" "cluster-auth" {
+  depends_on = ["module.eks", "null_resource.k8s-tiller-rbac"]
+  name       = "${module.eks.cluster_id}"
+}
+
+provider "kubernetes" {
+  host                   = "${data.aws_eks_cluster.cluster.endpoint}"
+  cluster_ca_certificate = "${base64decode(data.aws_eks_cluster.cluster.certificate_authority.0.data)}"
+  token                  = "${data.aws_eks_cluster_auth.cluster-auth.token}"
+  config_path            = "./kubeconfig_${module.eks.cluster_id}"
+}
+
+provider "helm" {
+  install_tiller  = true
+  tiller_image    = "gcr.io/kubernetes-helm/tiller:v2.14.1"
+  service_account = "${kubernetes_service_account.tiller.metadata.0.name}"
+  namespace       = "${kubernetes_service_account.tiller.metadata.0.namespace}"
+
+  kubernetes {
+    host                   = "${data.aws_eks_cluster.cluster.endpoint}"
+    cluster_ca_certificate = "${base64decode(data.aws_eks_cluster.cluster.certificate_authority.0.data)}"
+    token                  = "${data.aws_eks_cluster_auth.cluster-auth.token}"
+    config_path            = "./kubeconfig_${module.eks.cluster_id}"
+  }
+}
+
 resource "kubernetes_service_account" "tiller" {
   metadata {
     name      = "tiller"
@@ -38,16 +69,6 @@ resource "kubernetes_cluster_role_binding" "tiller" {
   ]
 }
 
-provider "helm" {
-  install_tiller  = true
-  tiller_image    = "gcr.io/kubernetes-helm/tiller:v2.14.1"
-  service_account = "${kubernetes_service_account.tiller.metadata.0.name}"
-  namespace       = "${kubernetes_service_account.tiller.metadata.0.namespace}"
-
-  kubernetes {
-    config_path = "./kubeconfig_${module.eks.cluster_id}"
-  }
-}
 data "helm_repository" "incubator" {
   name       = "incubator"
   url        = "https://kubernetes-charts-incubator.storage.googleapis.com"
