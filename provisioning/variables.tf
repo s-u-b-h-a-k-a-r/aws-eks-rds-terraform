@@ -1,7 +1,3 @@
-provider "aws" {
-  region = "${var.AWS_region}"
-}
-
 variable AWS_region {}
 variable AWS_vpc_name {}
 variable AWS_vpc_subnet {}

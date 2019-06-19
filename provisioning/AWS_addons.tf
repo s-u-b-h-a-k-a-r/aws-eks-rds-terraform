@@ -1,30 +1,8 @@
-resource "null_resource" "k8s-tiller-rbac" {
+resource "null_resource" "wait-for-eks" {
   depends_on = ["module.eks"]
-}
 
-data "aws_eks_cluster_auth" "cluster-auth" {
-  depends_on = ["module.eks", "null_resource.k8s-tiller-rbac"]
-  name       = "${module.eks.cluster_id}"
-}
-
-provider "kubernetes" {
-  host                   = "${module.eks.cluster_endpoint}"
-  cluster_ca_certificate = "${base64decode(module.eks.cluster_certificate_authority_data)}"
-  token                  = "${data.aws_eks_cluster_auth.cluster-auth.token}"
-  load_config_file       = false
-}
-
-provider "helm" {
-  install_tiller  = true
-  tiller_image    = "gcr.io/kubernetes-helm/tiller:v2.14.0"
-  service_account = "${kubernetes_service_account.tiller.metadata.0.name}"
-  namespace       = "${kubernetes_service_account.tiller.metadata.0.namespace}"
-
-  kubernetes {
-    host                   = "${module.eks.cluster_endpoint}"
-    cluster_ca_certificate = "${base64decode(module.eks.cluster_certificate_authority_data)}"
-    token                  = "${data.aws_eks_cluster_auth.cluster-auth.token}"
-    load_config_file       = false
+  triggers {
+    kube_config_rendered = "${module.eks.kubeconfig}"
   }
 }
 
@@ -35,7 +13,7 @@ resource "kubernetes_service_account" "tiller" {
   }
 
   automount_service_account_token = true
-  depends_on                      = ["module.eks", "null_resource.k8s-tiller-rbac"]
+  depends_on                      = ["null_resource.wait-for-eks"]
 }
 
 resource "kubernetes_cluster_role_binding" "tiller" {
@@ -85,4 +63,8 @@ resource "helm_release" "mydatabase" {
     name  = "mardiadbPassword"
     value = "qux"
   }
+
+  depends_on = [
+    "kubernetes_cluster_role_binding.tiller",
+  ]
 }

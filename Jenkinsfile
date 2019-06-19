@@ -90,6 +90,7 @@ spec:
                        wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']) {
                             dir ("provisioning") { 
                                 sh 'terraform init -backend-config="bucket=${bucket}" -backend-config="key=${cluster}/terraform.tfstate" -backend-config="region=${region}"'
+                                sh 'terraform output kubeconfig > ./kubeconfig_${cluster} || true'
                             }
                          }
                      }
