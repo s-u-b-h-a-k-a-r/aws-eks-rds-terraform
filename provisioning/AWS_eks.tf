@@ -9,7 +9,6 @@ module "eks" {
 
   vpc_id                 = "${module.vpc.vpc_id}"
   worker_groups          = "${var.EKS_worker_groups}"
-  worker_group_count     = "1"
   cluster_delete_timeout = "30m"
   cluster_create_timeout = "30m"
   manage_aws_auth        = "true"
