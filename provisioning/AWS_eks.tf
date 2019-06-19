@@ -14,5 +14,5 @@ module "eks" {
   cluster_create_timeout = "30m"
   manage_aws_auth        = "true"
   write_kubeconfig       = "true"
-  config_output_path     = "~/"
+  config_output_path     = "./"
 }
