@@ -21,12 +21,12 @@ EOS
 
 data "aws_eks_cluster" "cluster" {
   depends_on = ["module.eks"]
-  name       = "${local.eks_cluster_name}"
+  name       = "${module.eks.cluster_id}"
 }
 
 data "aws_eks_cluster_auth" "cluster-auth" {
   depends_on = ["module.eks", "null_resource.k8s-tiller-rbac"]
-  name       = "${local.eks_cluster_name}"
+  name       = "${module.eks.cluster_id}"
 }
 
 provider "helm" {
