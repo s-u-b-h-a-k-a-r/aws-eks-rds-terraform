@@ -12,7 +12,7 @@ data "aws_eks_cluster" "cluster" {
 }
 
 data "aws_eks_cluster_auth" "cluster-auth" {
-  depends_on = ["module.eks", "null_resource.k8s-tiller-rbac"]
+  depends_on = ["module.eks", "null_resource.wait-for-eks"]
   name       = "${module.eks.cluster_id}"
 }
 
