@@ -2,7 +2,7 @@
 # Data sources to get VPC, subnets and security group details
 ##############################################################
 
-resource "security_group" "sec_grp_rds" {
+resource "aws_security_group" "sec_grp_rds" {
   name_prefix = "${var.rds_identifier}-"
   vpc_id      = "${module.vpc.vpc_id}"
 
@@ -16,7 +16,7 @@ resource "security_group" "sec_grp_rds" {
   tags = "${var.tags}"
 }
 
-resource "security_group_rule" "allow-workers-nodes-communications" {
+resource "aws_security_group_rule" "allow-workers-nodes-communications" {
   description              = "Allow worker nodes to communicate with database"
   from_port                = 5432
   protocol                 = "tcp"
