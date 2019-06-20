@@ -17,7 +17,7 @@ spec:
   }
     options {
         disableConcurrentBuilds()
-        timeout(time: 1, unit: 'HOURS')
+        timeout(time: 2, unit: 'HOURS')
         ansiColor('xterm')
     }
     parameters {
@@ -33,13 +33,15 @@ spec:
         string(name: 'bucket', defaultValue : '<YOUR_BUCKET_NAME>', description: "Existing S3 bucket name to store <.tfstate> file.")
         string(name: 'region', defaultValue : '<YOUR_REGION>', description: "Region name where the bucket resides.")
         string(name: 'cluster', defaultValue : '<YOUR_CLUSTER>', description: "Unique EKS Cluster name [non existing cluster in case of new].")
-        text(name: 'parameters', defaultValue : '<YOUR_TERRAFORM_TFVARS>', description: "Provide all the parameters by visiting the below github link https://github.com/SubhakarKotta/aws-eks-rds-terraform/provisioning/terraform.tfvars.template  Make sure you update the values as per your requirements.  Provide unique values for the parameters  AWS_vpc_name|AWS_rds_identifier by appending  (cluster name) E.g.  cluster: {subhakar-demo-cluster}  AWS_vpc_name: {subhakar-demo-cluster-vpc} AWS_rds_identifier : {subhakar-demo-cluster} ")
         string(name: 'state', defaultValue : '<YOUR_JSON_PATH>', description: "Provide the json path to remove state")
+        text(name: 'cluster-configuration', defaultValue : '<YOUR_TERRAFORM_TFVARS>', description: "Provide all the parameters by visiting the below github link https://github.com/SubhakarKotta/aws-eks-rds-terraform/provisioning/terraform.tfvars.template  Make sure you update the values as per your requirements.  Provide unique values for the parameters  AWS_vpc_name|AWS_rds_identifier by appending  (cluster name) E.g.  cluster: {subhakar-demo-cluster}  AWS_vpc_name: {subhakar-demo-cluster-vpc} AWS_rds_identifier : {subhakar-demo-cluster} ")
+        text(name: 'pega-configuration', defaultValue : '<YOUR_PEGA_VALUES_YAML>', description: "")
     }
 
     environment {
        PLAN_NAME= "${cluster}-eks-terraform-plan"
        TFVARS_FILE_NAME= "${cluster}-eks-terraform.tfvars"
+       PEGA_VALUES_YAML_FILE_NAME= "pega_values.tpl"
        GIT_REPO = "https://github.com/SubhakarKotta/aws-eks-rds-terraform.git"
     }   
     
@@ -48,7 +50,7 @@ spec:
             steps {
                 script {
                     currentBuild.displayName = "#" + env.BUILD_NUMBER + " " + params.action + "-eks-" + params.cluster
-                    currentBuild.description = "Creates EKS Cluster and Postgres database"
+                    currentBuild.description = "Preview/Create/Validate/Destroy EKS Cluster and Postgres database"
                 }
             }
         }
@@ -57,13 +59,25 @@ spec:
 		             git url: "${GIT_REPO}",branch: "${branch}"
             }
   	    }
+        stage('Create values.yaml') {
+            steps {
+              container('jenkins-slave-terraform-kubectl-helm-awscli'){ 
+                    wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']) {
+                         dir ("provisioning") { 
+                             echo "${pega-configuration}"
+                             writeFile file: "${PEGA_VALUES_YAML_FILE_NAME}", text: "${pega-configuration}"
+                         }
+                     }
+                 }
+             }
+         } 
         stage('Create terraform.tfvars') {
             steps {
               container('jenkins-slave-terraform-kubectl-helm-awscli'){ 
                     wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']) {
                          dir ("provisioning") { 
-                             echo "${parameters}"
-                             writeFile file: "${TFVARS_FILE_NAME}", text: "${parameters}"
+                             echo "${cluster-configuration}"
+                             writeFile file: "${TFVARS_FILE_NAME}", text: "${cluster-configuration}"
                              echo " ############ Cluster @@@@@ ${cluster} @@@@@ #############"
                              echo " ############ Using @@@@@ ${TFVARS_FILE_NAME} @@@@@ #############"
                          }

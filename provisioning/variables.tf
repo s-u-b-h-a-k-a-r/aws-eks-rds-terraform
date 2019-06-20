@@ -1,20 +1,30 @@
+###################CLUSTER VARIABLES##################
 variable region {}
+
 variable vpc_name {}
 variable vpc_subnet {}
+
 variable azs {
   type = "list"
 }
+
 variable public_subnets {
   type = "list"
 }
+
 variable tags {
   type = "map"
 }
+
 variable name {}
+
 variable worker_groups {
   type = "list"
 }
+
+###################RDS VARIABLES##################
 variable "rds_name" {}
+
 variable "rds_port" {}
 variable "rds_identifier" {}
 variable "rds_storage_type" {}
@@ -25,3 +35,20 @@ variable "rds_instance_class" {}
 variable "rds_username" {}
 variable "rds_password" {}
 variable "rds_parameter_group_family" {}
+
+variable "rds_parameter_group_family" {}
+variable "rds_parameter_group_family" {}
+
+###################ADDONS VARIABLES##################
+variable "enable_dashboard" {
+  default = true
+}
+
+###################PEGA VARIABLES##################
+variable "namespace" {
+  default = "pega"
+}
+
+variable "chart_version" {
+  default = "8.3.0-9"
+}
