@@ -9,6 +9,8 @@ data "template_file" "pega-values" {
   vars = {
     JDBC_URL = "jdbc:postgresql://${module.db.this_db_instance_endpoint}/${module.db.this_db_instance_name}"
   }
+
+  depends_on = ["module.cluster", "module.db"]
 }
 
 resource "helm_release" "pega-installer" {
