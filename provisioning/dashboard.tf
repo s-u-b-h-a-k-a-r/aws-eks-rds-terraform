@@ -1,6 +1,6 @@
-resource "kubernetes_service_account" "cluster-admin" {
+resource "kubernetes_service_account" "eks-admin" {
   metadata {
-    name      = "cluster-admin"
+    name      = "eks-admin"
     namespace = "kube-system"
   }
 
@@ -8,20 +8,20 @@ resource "kubernetes_service_account" "cluster-admin" {
   depends_on                      = ["module.cluster"]
 }
 
-resource "kubernetes_cluster_role_binding" "cluster-admin" {
+resource "kubernetes_cluster_role_binding" "eks-admin" {
   metadata {
-    name = "cluster-admin"
+    name = "eks-admin"
   }
 
   role_ref {
     api_group = "rbac.authorization.k8s.io"
     kind      = "ClusterRole"
-    name      = "cluster-admin"
+    name      = "eks-admin"
   }
 
   subject {
     kind      = "ServiceAccount"
-    name      = "cluster-admin"
+    name      = "eks-admin"
     namespace = "kube-system"
   }
 

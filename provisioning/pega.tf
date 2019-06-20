@@ -7,7 +7,7 @@ data "template_file" "pega-values" {
   template = "${file("${path.module}/pega_values.tpl")}"
 
   vars = {
-    JDBC_URL = "jdbc:postgresql://${module.db.this_db_instance_endpoint}/${module.db.this_db_instance_name}"
+    jdbc_url = "jdbc:postgresql://${module.db.this_db_instance_endpoint}/${module.db.this_db_instance_name}"
   }
 
   depends_on = ["module.cluster", "module.db"]
