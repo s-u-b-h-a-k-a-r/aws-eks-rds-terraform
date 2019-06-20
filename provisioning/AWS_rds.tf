@@ -52,7 +52,7 @@ module "db" {
   password = "${var.rds_password}"
   port     = "${var.rds_port}"
 
-  vpc_security_group_ids = ["${security_group.sec_grp_rds.id}"]
+  vpc_security_group_ids = ["${aws_security_group.sec_grp_rds.id}"]
 
   maintenance_window = "Mon:00:00-Mon:03:00"
   backup_window      = "03:00-06:00"
