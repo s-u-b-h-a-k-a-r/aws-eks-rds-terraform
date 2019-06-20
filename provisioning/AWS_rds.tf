@@ -20,8 +20,8 @@ resource "aws_security_group_rule" "allow-workers-nodes-communications" {
   description              = "Allow worker nodes to communicate with database"
   from_port                = 5432
   protocol                 = "tcp"
-  security_group_id        = "${security_group.sec_grp_rds.id}"
-  source_security_group_id = "${module.eks.worker_security_group_id}"
+  security_group_id        = "${aws_security_group.sec_grp_rds.id}"
+  source_security_group_id = "${module.cluster.worker_security_group_id}"
   to_port                  = 5432
   type                     = "ingress"
 }
