@@ -67,4 +67,5 @@ module "db" {
 
   # DB parameter group
   family = "${var.AWS_rds_parameter_group_family}"
+  parameter_group_name = "default.postgres9.6"
 }
