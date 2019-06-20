@@ -41,5 +41,5 @@ resource "helm_release" "dashboard" {
     value = true
   }
 
-  depends_on = ["kubernetes_service_account.eks-admin", "kubernetes_cluster_role_binding.eks-admin", "kubernetes_service_account.tiller", "kubernetes_cluster_role_binding.tiller"]
+  depends_on = ["kubernetes_service_account.cluster-admin", "kubernetes_cluster_role_binding.cluster-admin", "kubernetes_service_account.tiller", "kubernetes_cluster_role_binding.tiller"]
 }
