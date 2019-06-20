@@ -34,8 +34,8 @@ spec:
         string(name: 'region', defaultValue : '<YOUR_REGION>', description: "Region name where the bucket resides.")
         string(name: 'cluster', defaultValue : '<YOUR_CLUSTER>', description: "Unique EKS Cluster name [non existing cluster in case of new].")
         string(name: 'state', defaultValue : '<YOUR_JSON_PATH>', description: "Provide the json path to remove state")
-        text(name: 'cluster-configuration', defaultValue : '<YOUR_TERRAFORM_TFVARS>', description: "Provide all the parameters by visiting the below github link https://github.com/SubhakarKotta/aws-eks-rds-terraform/provisioning/terraform.tfvars.template  Make sure you update the values as per your requirements.  Provide unique values for the parameters  AWS_vpc_name|AWS_rds_identifier by appending  (cluster name) E.g.  cluster: {subhakar-demo-cluster}  AWS_vpc_name: {subhakar-demo-cluster-vpc} AWS_rds_identifier : {subhakar-demo-cluster} ")
-        text(name: 'pega-configuration', defaultValue : '<YOUR_PEGA_VALUES_YAML>', description: "")
+        text(name: 'parameters', defaultValue : '<YOUR_TERRAFORM_TFVARS>', description: "Provide all the parameters by visiting the below github link https://github.com/SubhakarKotta/aws-eks-rds-terraform/provisioning/terraform.tfvars.template  Make sure you update the values as per your requirements.  Provide unique values for the parameters  AWS_vpc_name|AWS_rds_identifier by appending  (cluster name) E.g.  cluster: {subhakar-demo-cluster}  AWS_vpc_name: {subhakar-demo-cluster-vpc} AWS_rds_identifier : {subhakar-demo-cluster} ")
+        text(name: 'pega', defaultValue : '<YOUR_PEGA_VALUES_YAML>', description: "")
     }
 
     environment {
@@ -64,8 +64,8 @@ spec:
               container('jenkins-slave-terraform-kubectl-helm-awscli'){ 
                     wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']) {
                          dir ("provisioning") { 
-                             echo "${pega-configuration}"
-                             writeFile file: "${PEGA_VALUES_YAML_FILE_NAME}", text: "${pega-configuration}"
+                             echo "${pega}"
+                             writeFile file: "${PEGA_VALUES_YAML_FILE_NAME}", text: "${pega}"
                          }
                      }
                  }
@@ -76,8 +76,8 @@ spec:
               container('jenkins-slave-terraform-kubectl-helm-awscli'){ 
                     wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']) {
                          dir ("provisioning") { 
-                             echo "${cluster-configuration}"
-                             writeFile file: "${TFVARS_FILE_NAME}", text: "${cluster-configuration}"
+                             echo "${parameters}"
+                             writeFile file: "${TFVARS_FILE_NAME}", text: "${parameters}"
                              echo " ############ Cluster @@@@@ ${cluster} @@@@@ #############"
                              echo " ############ Using @@@@@ ${TFVARS_FILE_NAME} @@@@@ #############"
                          }
