@@ -49,7 +49,3 @@ variable "namespace" {
 variable "chart_version" {
   default = "8.3.0-9"
 }
-
-variable "driver_url" {
-  default = ""
-}
