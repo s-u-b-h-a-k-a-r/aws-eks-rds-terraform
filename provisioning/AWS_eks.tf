@@ -1,6 +1,7 @@
 // Configure AWS EKS Cluster
 
 module "eks" {
+  version      = "v5.0.0"
   source       = "terraform-aws-modules/eks/aws"
   cluster_name = "${var.EKS_name}"
   subnets      = "${module.vpc.public_subnets}"

@@ -155,10 +155,7 @@ spec:
                          wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']) {
                              dir ("provisioning") {
                                     sh 'terraform plan  -var EKS_name=$cluster --var-file=${TFVARS_FILE_NAME}  -out=${PLAN_NAME}'
-                                    sh 'terraform apply  -auto-approve ${PLAN_NAME} || true'
-
-                                    sh 'terraform plan  -var EKS_name=$cluster --var-file=${TFVARS_FILE_NAME}  -out=${PLAN_NAME}'
-                                    sh 'terraform apply  -auto-approve ${PLAN_NAME}'
+                                    sh 'terraform apply  -var EKS_name=$cluster --var-file=${TFVARS_FILE_NAME} -auto-approve'
                              }
                         }
                     }
