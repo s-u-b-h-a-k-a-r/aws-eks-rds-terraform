@@ -1,25 +1,19 @@
 variable region {}
 variable vpc_name {}
 variable vpc_subnet {}
-
 variable azs {
   type = "list"
 }
-
 variable public_subnets {
   type = "list"
 }
-
 variable tags {
   type = "map"
 }
-
 variable name {}
-
 variable worker_groups {
   type = "list"
 }
-
 variable "rds_name" {}
 variable "rds_port" {}
 variable "rds_identifier" {}

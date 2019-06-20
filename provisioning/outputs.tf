@@ -1,71 +1,71 @@
 ##########################################################################################
 # AWS EKS Output
 output "kubeconfig" {
-  value = "${module.eks.kubeconfig}"
+  value = "${module.cluster.kubeconfig}"
 }
 
 output "kubeconfig_filename" {
-  value = "${module.eks.kubeconfig_filename}"
+  value = "${module.cluster.kubeconfig_filename}"
 }
 
 output "cluster_certificate_authority_data" {
-  value = "${module.eks.cluster_certificate_authority_data}"
+  value = "${module.cluster.cluster_certificate_authority_data}"
 }
 
 output "cluster_endpoint" {
-  value = "${module.eks.cluster_endpoint}"
+  value = "${module.cluster.cluster_endpoint}"
 }
 
 output "cluster_iam_role_arn" {
-  value = "${module.eks.cluster_iam_role_arn}"
+  value = "${module.cluster.cluster_iam_role_arn}"
 }
 
 output "cluster_iam_role_name" {
-  value = "${module.eks.cluster_iam_role_name}"
+  value = "${module.cluster.cluster_iam_role_name}"
 }
 
 output "cluster_id" {
-  value = "${module.eks.cluster_id}"
+  value = "${module.cluster.cluster_id}"
 }
 
 output "cluster_security_group_id" {
-  value = "${module.eks.cluster_security_group_id}"
+  value = "${module.cluster.cluster_security_group_id}"
 }
 
 output "cluster_version" {
-  value = "${module.eks.cluster_version}"
+  value = "${module.cluster.cluster_version}"
 }
 
 output "config_map_aws_auth" {
-  value = "${module.eks.config_map_aws_auth}"
+  value = "${module.cluster.config_map_aws_auth}"
 }
 
 output "worker_iam_instance_profile_arns" {
-  value = "${module.eks.worker_iam_instance_profile_arns}"
+  value = "${module.cluster.worker_iam_instance_profile_arns}"
 }
 
 output "worker_iam_instance_profile_names" {
-  value = "${module.eks.worker_iam_instance_profile_names}"
+  value = "${module.cluster.worker_iam_instance_profile_names}"
 }
 
 output "worker_iam_role_arn" {
-  value = "${module.eks.worker_iam_role_arn}"
+  value = "${module.cluster.worker_iam_role_arn}"
 }
 
 output "worker_iam_role_name" {
-  value = "${module.eks.worker_iam_role_name}"
+  value = "${module.cluster.worker_iam_role_name}"
 }
 
 output "worker_security_group_id" {
-  value = "${module.eks.worker_security_group_id}"
+  value = "${module.cluster.worker_security_group_id}"
 }
 
 output "workers_asg_arns" {
-  value = "${module.eks.workers_asg_arns}"
+  value = "${module.cluster.workers_asg_arns}"
 }
 
 output "workers_asg_names" {
-  value = "${module.eks.workers_asg_names}"
+  value = "${module.cluster.workers_asg_names}"
 }
 
 ##########################################################################################
