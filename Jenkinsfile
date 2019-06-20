@@ -122,7 +122,7 @@ spec:
                      withCredentials([[$class: 'AmazonWebServicesCredentialsBinding',credentialsId: params.credential,accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY' ]]) {
                          wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']) {
                              dir ("provisioning") { 
-                                 sh 'terraform validate -var  EKS_name=${cluster} --var-file=${TFVARS_FILE_NAME}'
+                                 sh 'terraform validate -var  name=${cluster} --var-file=${TFVARS_FILE_NAME}'
                              }
                          }
                      }
@@ -138,7 +138,7 @@ spec:
                     withCredentials([[$class: 'AmazonWebServicesCredentialsBinding',credentialsId: params.credential,accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY' ]]) {
                         wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']) {
                             dir ("provisioning") {
-                                sh 'terraform plan -var EKS_name=$cluster --var-file=${TFVARS_FILE_NAME}'
+                                sh 'terraform plan -var name=$cluster --var-file=${TFVARS_FILE_NAME}'
                              }
                          }
                      }
@@ -154,8 +154,8 @@ spec:
                      withCredentials([[$class: 'AmazonWebServicesCredentialsBinding',credentialsId: params.credential,accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY' ]]) {
                          wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']) {
                              dir ("provisioning") {
-                                    sh 'terraform plan  -var EKS_name=$cluster --var-file=${TFVARS_FILE_NAME}  -out=${PLAN_NAME}'
-                                    sh 'terraform apply  -var EKS_name=$cluster --var-file=${TFVARS_FILE_NAME} -auto-approve'
+                                    sh 'terraform plan  -var name=$cluster --var-file=${TFVARS_FILE_NAME}  -out=${PLAN_NAME}'
+                                    sh 'terraform apply  -var name=$cluster --var-file=${TFVARS_FILE_NAME} -auto-approve'
                              }
                         }
                     }
@@ -187,7 +187,7 @@ spec:
                        withCredentials([[$class: 'AmazonWebServicesCredentialsBinding',credentialsId: params.credential,accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY' ]]) {
                            wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']) {
                                dir ("provisioning") {
-                                 sh 'terraform plan -destroy -var EKS_name=${cluster} --var-file=${TFVARS_FILE_NAME}'
+                                 sh 'terraform plan -destroy -var name=${cluster} --var-file=${TFVARS_FILE_NAME}'
                                }
                            }
                         }
@@ -203,7 +203,7 @@ spec:
                      withCredentials([[$class: 'AmazonWebServicesCredentialsBinding',credentialsId: params.credential,accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY' ]]) {
                          wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']) {
                               dir ("provisioning") {
-                                   sh 'terraform destroy -var EKS_name=${cluster} --var-file=${TFVARS_FILE_NAME} -force'
+                                   sh 'terraform destroy -var name=${cluster} --var-file=${TFVARS_FILE_NAME} -force'
                                }
                          }
                      }

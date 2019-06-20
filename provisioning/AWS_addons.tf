@@ -1,35 +1,16 @@
-provider "kubernetes" {
-  version          = "~> 1.7"
-  load_config_file = true
-  config_path      = "./kubeconfig_${module.eks.cluster_id}"
-}
-
-provider "helm" {
-  version         = "~> 0.10"
-  install_tiller  = true
-  tiller_image    = "gcr.io/kubernetes-helm/tiller:v2.14.0"
-  service_account = "${kubernetes_service_account.tiller.metadata.0.name}"
-  namespace       = "${kubernetes_service_account.tiller.metadata.0.namespace}"
-
-  kubernetes {
-    load_config_file = true
-    config_path      = "./kubeconfig_${module.eks.cluster_id}"
-  }
-}
-
-resource "kubernetes_service_account" "tiller" {
+resource "kubernetes_service_account" "eks-admin" {
   metadata {
-    name      = "tiller"
+    name      = "eks-admin"
     namespace = "kube-system"
   }
 
   automount_service_account_token = true
-  depends_on                      = ["module.eks"]
+  depends_on                      = ["module.cluster"]
 }
 
-resource "kubernetes_cluster_role_binding" "tiller" {
+resource "kubernetes_cluster_role_binding" "eks-admin" {
   metadata {
-    name = "tiller"
+    name = "eks-admin"
   }
 
   role_ref {
@@ -40,26 +21,24 @@ resource "kubernetes_cluster_role_binding" "tiller" {
 
   subject {
     kind      = "ServiceAccount"
-    name      = "tiller"
+    name      = "eks-admin"
     namespace = "kube-system"
   }
 
-  depends_on = [
-    "kubernetes_service_account.tiller",
-  ]
+  depends_on = ["kubernetes_service_account.eks-admin"]
 }
 
-data "helm_repository" "incubator" {
-  name = "incubator"
-  url  = "https://kubernetes-charts-incubator.storage.googleapis.com"
-}
+resource "helm_release" "dashboard" {
+  name      = "dashboard"
+  chart     = "stable/kubernetes-dashboard"
+  namespace = "kube-system"
+  version   = "1.5.2"
+  keyring   = ""
 
-data "helm_repository" "stable" {
-  name = "stable"
-  url  = "https://kubernetes-charts.storage.googleapis.com/"
-}
+  set {
+    name  = "rbac.create"
+    value = true
+  }
 
-data "helm_repository" "pega" {
-  name = "pega"
-  url  = "https://scrumteamwhitewalkers.github.io/pega-helm-charts/"
+  depends_on = ["kubernetes_service_account.eks-admin", "kubernetes_cluster_role_binding.eks-admin", "kubernetes_service_account.tiller", "kubernetes_cluster_role_binding.tiller"]
 }
