@@ -63,7 +63,7 @@ module "db" {
   tags = "${var.AWS_tags}"
 
   # DB subnet group
-  subnet_ids = ["${module.vpc.public_subnets}"]
+  subnet_ids = "${module.vpc.public_subnets}"
 
   # DB parameter group
   family = "${var.AWS_rds_parameter_group_family}"
