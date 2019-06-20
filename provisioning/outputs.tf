@@ -172,7 +172,7 @@ output "db_option_group_id" {
 output "db_parameter_group_arn" {
   value = "${module.db.this_db_parameter_group_arn}"
 }
-/*
+
 output "db_parameter_group_id" {
   value = "${module.db.this_db_parameter_group_id}"
 }
@@ -180,7 +180,7 @@ output "db_parameter_group_id" {
 output "db_subnet_group_arn" {
   value = "${module.db.this_db_subnet_group_arn}"
 }
-*/
+
 output "db_subnet_group_id" {
   value = "${module.db.this_db_subnet_group_id}"
 }
