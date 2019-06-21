@@ -36,7 +36,7 @@ spec:
         string(name: 'cluster', defaultValue : '<YOUR_CLUSTER>', description: "Unique EKS Cluster name [non existing cluster in case of new].")
         string(name: 'state', defaultValue : '<YOUR_JSON_PATH>', description: "Provide the json path to remove state")
         text(name: 'parameters', defaultValue : '<YOUR_TERRAFORM_TFVARS>', description: "Provide all the parameters by visiting the below github link https://github.com/SubhakarKotta/aws-eks-rds-terraform/provisioning/terraform.tfvars.template  Make sure you update the values as per your requirements.  Provide unique values for the parameters  AWS_vpc_name|AWS_rds_identifier by appending  (cluster name) E.g.  cluster: {subhakar-demo-cluster}  AWS_vpc_name: {subhakar-demo-cluster-vpc} AWS_rds_identifier : {subhakar-demo-cluster} ")
-        text(name: 'pega', defaultValue : '<YOUR_PEGA_VALUES_YAML_TEMPLATE>', description: "")
+        text(name: 'pega', defaultValue : '', description: "")
     }
 
     environment {
@@ -154,16 +154,22 @@ spec:
             }
             steps {
                container('jenkins-slave-terraform-kubectl-helm-awscli'){ 
-                    withCredentials([[$class: 'AmazonWebServicesCredentialsBinding',credentialsId: params.awscredential,accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY' ]]) {
-                        wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']) {
-                            dir ("provisioning") {
-                                sh 'terraform plan -var name=$cluster --var-file=${TFVARS_FILE_NAME}'
+                   withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: params.dockercredential, usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
+                       withCredentials([[$class: 'AmazonWebServicesCredentialsBinding',credentialsId: params.awscredential,accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY' ]]) {
+                           wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']) {
+                               dir ("provisioning") {
+                                  sh 'echo AWS_ACCESS_KEY_ID # ${AWS_ACCESS_KEY_ID}' 
+                                  sh 'echo AWS_SECRET_ACCESS_KEY # ${AWS_SECRET_ACCESS_KEY}' 
+                                  sh 'echo DOCKER_USERNAME # ${USERNAME}' 
+                                  sh 'echo DOCKER_PASSWORD # ${PASSWORD}' 
+                                  sh 'terraform plan  -var docker_username=$USERNAME -var docker_password=$PASSWORD -var aws_access_key_id=$AWS_ACCESS_KEY_ID  -var aws_secret_access_key=$AWS_SECRET_ACCESS_KEY -var name=$cluster --var-file=${TFVARS_FILE_NAME}  -out=${PLAN_NAME}'
+                                 }
                              }
                          }
                      }
                  }
              }
-        }
+         }
         stage('create') {
             when {
                 expression { params.action == 'create' }
@@ -174,8 +180,8 @@ spec:
                          withCredentials([[$class: 'AmazonWebServicesCredentialsBinding',credentialsId: params.awscredential,accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY' ]]) {
                              wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']) {
                                 dir ("provisioning") {
-                                    sh 'terraform plan  -var docker_username=$USERNAME docker_password=$PASSWORD -var aws_access_key_id=$AWS_ACCESS_KEY_ID  -var aws_secret_access_key=$AWS_SECRET_ACCESS_KEY -var name=$cluster --var-file=${TFVARS_FILE_NAME}  -out=${PLAN_NAME}'
-                                    sh 'terraform apply   -var docker_username=$USERNAME docker_password=$PASSWORD aws_access_key_id=$AWS_ACCESS_KEY_ID  -var aws_secret_access_key=$AWS_SECRET_ACCESS_KEY -var name=$cluster --var-file=${TFVARS_FILE_NAME} -auto-approve'
+                                    sh 'terraform plan     -var docker_username=$USERNAME -var docker_password=$PASSWORD -var aws_access_key_id=$AWS_ACCESS_KEY_ID  -var aws_secret_access_key=$AWS_SECRET_ACCESS_KEY -var name=$cluster --var-file=${TFVARS_FILE_NAME}  -out=${PLAN_NAME}'
+                                    sh 'terraform apply   -var docker_username=$USERNAME -var docker_password=$PASSWORD aws_access_key_id=$AWS_ACCESS_KEY_ID  -var aws_secret_access_key=$AWS_SECRET_ACCESS_KEY -var name=$cluster --var-file=${TFVARS_FILE_NAME} -auto-approve'
                                  }
                              }
                          }
