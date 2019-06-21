@@ -2,7 +2,6 @@ module "pega" {
   kubernetes_provider   = "eks"
   source                = "github.com/scrumteamwhitewalkers/terraform-pega-modules.git"
   cluster_name          = "${module.cluster.cluster_id}"
-  enable_dashboard      = "1"
   chart_version         = "8.3.0-9"
   namespace             = "pega"
   release_name          = "pega"
