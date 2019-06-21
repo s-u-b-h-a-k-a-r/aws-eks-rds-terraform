@@ -9,7 +9,7 @@ module "pega" {
   aws_access_key_id     = "${var.aws_access_key_id}"
   aws_secret_access_key = "${var.aws_secret_access_key}"
   deployment_timeout    = "7200"
-  docker_password       = "system123!"
+  docker_password       = "system123$"
   docker_username       = "systemmanagementteam"
   docker_url            = "https://index.docker.io/v1/"
   repo_url              = "https://scrumteamwhitewalkers.github.io/pega-helm-charts/"
