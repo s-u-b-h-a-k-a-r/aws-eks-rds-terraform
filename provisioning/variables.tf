@@ -48,12 +48,3 @@ variable "rds_parameter_group_family" {}
 variable "enable_dashboard" {
   default = true
 }
-
-###################PEGA VARIABLES##################
-variable "namespace" {
-  default = "pega"
-}
-
-variable "chart_version" {
-  default = "8.3.0-9"
-}

@@ -35,7 +35,7 @@ module "db" {
 
   identifier = "${var.rds_identifier}"
 
-  engine              = "${var.rds_engine}"
+  engine              = "${module.cluster.cluster_id}"
   engine_version      = "${var.rds_engine_version}"
   instance_class      = "${var.rds_instance_class}"
   allocated_storage   = "${var.rds_allocated_storage}"
