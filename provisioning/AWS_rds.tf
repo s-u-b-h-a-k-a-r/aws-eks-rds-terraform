@@ -3,7 +3,7 @@
 ##############################################################
 
 resource "aws_security_group" "sec_grp_rds" {
-  name_prefix = "${var.rds_identifier}-"
+  name_prefix = "${module.cluster.cluster_id}-"
   vpc_id      = "${module.vpc.vpc_id}"
 
   egress {

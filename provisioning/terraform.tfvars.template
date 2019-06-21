@@ -15,7 +15,6 @@ worker_groups                   = [
     }]
 rds_name                        = "dev"
 rds_port                        = "5432"
-rds_identifier                  = "subhakar-demo-cloud"
 rds_storage_type                = "gp2"
 rds_allocated_storage           = "50"
 rds_engine                      = "postgres"

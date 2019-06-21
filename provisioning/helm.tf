@@ -18,7 +18,7 @@ resource "kubernetes_service_account" "tiller" {
   }
 
   automount_service_account_token = true
-  depends_on                      = ["module.cluster", "module.db"]
+  depends_on                      = ["module.cluster"]
 }
 
 resource "kubernetes_cluster_role_binding" "tiller" {

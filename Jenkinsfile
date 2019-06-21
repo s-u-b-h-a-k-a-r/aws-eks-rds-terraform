@@ -129,7 +129,7 @@ spec:
          } 
         stage('validate') {
             when {
-                expression { params.action == 'preview' || params.action == 'create' }
+                expression { params.action == 'preview' || params.action == 'create'  || params.action == 'destroy' }
              }
              steps {
                 container('jenkins-slave-terraform-kubectl-helm-awscli'){ 

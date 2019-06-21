@@ -34,7 +34,6 @@ variable worker_groups {
 variable "rds_name" {}
 
 variable "rds_port" {}
-variable "rds_identifier" {}
 variable "rds_storage_type" {}
 variable "rds_allocated_storage" {}
 variable "rds_engine" {}
