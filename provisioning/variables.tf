@@ -2,11 +2,13 @@
 variable region {}
 
 variable aws_access_key_id {
-  default=""
+  default = ""
 }
+
 variable aws_secret_access_key {
-  default=""
+  default = ""
 }
+
 variable vpc_name {}
 variable vpc_subnet {}
 
