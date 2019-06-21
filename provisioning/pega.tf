@@ -1,20 +1,18 @@
-data "helm_repository" "pega" {
-  name = "pega"
-  url  = "https://scrumteamwhitewalkers.github.io/pega-helm-charts/"
-}
-
-resource "helm_release" "pega-installer" {
-  namespace  = "${var.namespace}"
-  repository = "${data.helm_repository.pega.metadata.0.name}"
-  name       = "${var.namespace}"
-  chart      = "${var.namespace}"
-  version    = "${var.chart_version}"
-  values     = ["${file("${path.module}/pega_values.tpl")}"]
-  wait       = true
-  timeout    = 7200
-
-  set {
-    name  = "jdbc.url"
-    value = "jdbc:postgresql://${module.db.this_db_instance_endpoint}/${module.db.this_db_instance_name}"
-  }
+module "pega" {
+  provider              = "eks"
+  source                = "github.com/scrumteamwhitewalkers/terraform-pega-modules.git"
+  cluster_name          = "${var.name}"
+  enable_dashboard      = "1"
+  chart_version         = "8.3.0-9"
+  namespace             = "pega"
+  release_name          = "pega"
+  chart_name            = "pega"
+  aws_access_key_id     = ""
+  aws_secret_access_key = ""
+  deployment_timeout    = "7200"
+  docker_password       = "system123!"
+  docker_username       = "systemmanagementteam"
+  docker_url            = "https://index.docker.io/v1/"
+  repo_url              = "https://scrumteamwhitewalkers.github.io/pega-helm-charts/"
+  jdbc_url              = "jdbc:postgresql://${module.db.this_db_instance_endpoint}/${module.db.this_db_instance_name}"
 }
