@@ -21,5 +21,5 @@ module "pega" {
 resource "local_file" "kubeconfig" {
   depends_on = ["module.cluster", "module.db"]
   content    = "${module.cluster.kubeconfig}"
-  filename   = "./kubeconfig_${var.cluster_name}"
+  filename   = "./kubeconfig_${module.eks.cluster_id}"
 }
