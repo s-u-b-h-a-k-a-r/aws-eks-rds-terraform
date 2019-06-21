@@ -1,6 +1,12 @@
 ###################CLUSTER VARIABLES##################
 variable region {}
 
+variable aws_access_key_id {
+  default=""
+}
+variable aws_secret_access_key {
+  default=""
+}
 variable vpc_name {}
 variable vpc_subnet {}
 

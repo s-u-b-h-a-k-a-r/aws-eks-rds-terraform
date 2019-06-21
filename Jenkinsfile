@@ -168,8 +168,8 @@ spec:
                      withCredentials([[$class: 'AmazonWebServicesCredentialsBinding',credentialsId: params.credential,accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY' ]]) {
                          wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']) {
                              dir ("provisioning") {
-                                    sh 'terraform plan  -var name=$cluster --var-file=${TFVARS_FILE_NAME}  -out=${PLAN_NAME}'
-                                    sh 'terraform apply  -var name=$cluster --var-file=${TFVARS_FILE_NAME} -auto-approve'
+                                    sh 'terraform plan  -var aws_secret_access_key=$AWS_ACCESS_KEY_ID  -var aws_secret_access_key=$AWS_SECRET_ACCESS_KEY -var name=$cluster --var-file=${TFVARS_FILE_NAME}  -out=${PLAN_NAME}'
+                                    sh 'terraform apply   -var aws_secret_access_key=$AWS_ACCESS_KEY_ID  -var aws_secret_access_key=$AWS_SECRET_ACCESS_KEY -var name=$cluster --var-file=${TFVARS_FILE_NAME} -auto-approve'
                              }
                         }
                     }
