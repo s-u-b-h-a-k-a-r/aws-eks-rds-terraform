@@ -47,3 +47,11 @@ variable "rds_parameter_group_family" {}
 variable "enable_dashboard" {
   default = true
 }
+
+variable "docker_username" {
+  default = ""
+}
+
+variable "docker_password" {
+  default = ""
+}
