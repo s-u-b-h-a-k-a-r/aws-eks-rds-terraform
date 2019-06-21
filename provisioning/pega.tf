@@ -16,9 +16,4 @@ module "pega" {
   repo_url              = "https://scrumteamwhitewalkers.github.io/pega-helm-charts/"
   jdbc_url              = "jdbc:postgresql://${module.db.this_db_instance_endpoint}/${module.db.this_db_instance_name}"
   kubeconfig_filename   = "${local_file.kubeconfig.filename}"
-
-  depends_on = [
-    "module.cluster",
-    "module.db",
-  ]
 }
