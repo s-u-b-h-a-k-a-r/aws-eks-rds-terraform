@@ -1,5 +1,5 @@
 module "pega" {
-  provider              = "eks"
+  kubernetes_provider   = "eks"
   source                = "github.com/scrumteamwhitewalkers/terraform-pega-modules.git"
   cluster_name          = "${var.name}"
   enable_dashboard      = "1"
