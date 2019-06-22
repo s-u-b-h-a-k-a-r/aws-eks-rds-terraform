@@ -1,6 +1,10 @@
 ###################CLUSTER VARIABLES##################
 variable region {}
 
+variable aws_access_key_id {}
+
+variable aws_secret_access_key {}
+
 variable vpc_name {}
 variable vpc_subnet {}
 
@@ -34,3 +38,30 @@ variable "rds_instance_class" {}
 variable "rds_username" {}
 variable "rds_password" {}
 variable "rds_parameter_group_family" {}
+
+###################ADDONS VARIABLES##################
+variable "enable_dashboard" {
+  default = true
+}
+
+variable "docker_username" {}
+
+variable "docker_password" {}
+
+variable "namespace" {
+  default = "pega"
+}
+
+variable "release_name" {
+  default = "pega"
+}
+
+variable "chart_name" {
+  default = "pega"
+}
+
+variable "chart_version" {}
+
+variable "repo_url" {
+  default = "https://scrumteamwhitewalkers.github.io/pega-helm-charts/"
+}
