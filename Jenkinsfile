@@ -152,7 +152,7 @@ spec:
                                  sh 'terraform validate -var  name=${cluster} --var-file=${TFVARS_FILE_NAME}'
                              }
                              dir ("terraform-pega-modules") { 
-                                 sh 'terraform validate -var  name=${cluster} --var-file=${TFVARS_FILE_NAME}'
+                                 sh 'terraform validate -var kubernetes_provider=eks -var  name=${cluster} --var-file=${TFVARS_FILE_NAME}'
                              }
                          }
                      }
@@ -172,7 +172,7 @@ spec:
                                     sh 'terraform plan  -var name=$cluster --var-file=${TFVARS_FILE_NAME}  -out=${PLAN_NAME}'
                                  }
                                 dir ("terraform-pega-modules") { 
-                                   sh 'terraform plan  -var docker_username=$USERNAME -var docker_password=$PASSWORD -var aws_access_key_id=$AWS_ACCESS_KEY_ID  -var aws_secret_access_key=$AWS_SECRET_ACCESS_KEY -var name=$cluster --var-file=${TFVARS_FILE_NAME}  -out=${PLAN_NAME}'
+                                   sh 'terraform plan  -var kubernetes_provider=eks -var docker_username=$USERNAME -var docker_password=$PASSWORD -var aws_access_key_id=$AWS_ACCESS_KEY_ID  -var aws_secret_access_key=$AWS_SECRET_ACCESS_KEY -var name=$cluster --var-file=${TFVARS_FILE_NAME}  -out=${PLAN_NAME}'
                                  }
                              }
                          }
