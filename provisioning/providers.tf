@@ -3,12 +3,6 @@ provider "aws" {
   region  = "${var.region}"
 }
 
-provider "kubernetes" {
-  version          = "~> 1.7"
-  load_config_file = true
-  config_path      = "./kubeconfig_${module.cluster.cluster_id}"
-}
-
 provider "local" {
   version = "~> 1.2"
 }

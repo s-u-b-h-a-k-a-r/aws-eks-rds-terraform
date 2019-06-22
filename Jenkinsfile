@@ -39,7 +39,8 @@ spec:
        PLAN_NAME= "${cluster}-eks-terraform-plan"
        TFVARS_FILE_NAME= "${cluster}-eks-terraform.tfvars"
        PEGA_VALUES_YAML_TEMPLATE= "pega/templates/eks_values.tpl"
-       GIT_REPO = "https://github.com/SubhakarKotta/aws-eks-rds-terraform.git"
+       GIT_CLUSTER_REPO = "https://github.com/SubhakarKotta/aws-eks-rds-terraform.git"
+       GIT_PEGA_REPO = "https://github.com/scrumteamwhitewalkers/terraform-pega-modules.git"
     }   
     
     stages {
@@ -53,7 +54,12 @@ spec:
         }
         stage('Git Checkout'){
             steps {
-		             git url: "${GIT_REPO}",credentialsId: 'github_kotts1'
+                    dir ("aws-eks-rds-terraform") { 
+		                git url: "${GIT_CLUSTER_REPO}",credentialsId: 'github_kotts1'
+                     }
+                     dir ("terraform-pega-modules") { 
+                        git url: "${GIT_PEGA_REPO}"
+                     }
             }
   	    }
         stage('Create eks_values.tpl') {
@@ -63,7 +69,7 @@ spec:
             steps {
               container('jenkins-slave-terraform-kubectl-helm-awscli'){ 
                     wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']) {
-                         dir ("provisioning") { 
+                         dir ("terraform-pega-modules") { 
                              echo "${pega}"
                              sh 'rm -f ${PEGA_VALUES_YAML_TEMPLATE}'
                              writeFile file: "${PEGA_VALUES_YAML_TEMPLATE}", text: "${pega}"
@@ -76,11 +82,14 @@ spec:
             steps {
               container('jenkins-slave-terraform-kubectl-helm-awscli'){ 
                     wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']) {
-                         dir ("provisioning") { 
+                         dir ("aws-eks-rds-terraform/provisioning") { 
                              echo "${parameters}"
                              writeFile file: "${TFVARS_FILE_NAME}", text: "${parameters}"
                              echo " ############ Cluster @@@@@ ${cluster} @@@@@ #############"
                              echo " ############ Using @@@@@ ${TFVARS_FILE_NAME} @@@@@ #############"
+                         }
+                        dir ("terraform-pega-modules") { 
+                             writeFile file: "${TFVARS_FILE_NAME}", text: "${parameters}"
                          }
                      }
                }
@@ -103,9 +112,12 @@ spec:
                container('jenkins-slave-terraform-kubectl-helm-awscli'){ 
                    withCredentials([[$class: 'AmazonWebServicesCredentialsBinding',credentialsId: params.aws,accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY' ]]) {
                        wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']) {
-                            dir ("provisioning") { 
+                            dir ("aws-eks-rds-terraform/provisioning") { 
                                 sh 'terraform init -backend-config="bucket=${bucket}" -backend-config="key=${cluster}/terraform.tfstate" -backend-config="region=${region}"'
                                 sh 'terraform output kubeconfig > ./kubeconfig_${cluster} || true'
+                            }
+                            dir ("terraform-pega-modules") { 
+                                sh 'terraform init -backend-config="bucket=${bucket}" -backend-config="key=${cluster}/terraform.tfstate" -backend-config="region=${region}"'
                             }
                          }
                      }
@@ -136,7 +148,10 @@ spec:
                 container('jenkins-slave-terraform-kubectl-helm-awscli'){ 
                      withCredentials([[$class: 'AmazonWebServicesCredentialsBinding',credentialsId: params.aws,accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY' ]]) {
                          wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']) {
-                             dir ("provisioning") { 
+                             dir ("aws-eks-rds-terraform/provisioning") { 
+                                 sh 'terraform validate -var  name=${cluster} --var-file=${TFVARS_FILE_NAME}'
+                             }
+                             dir ("terraform-pega-modules") { 
                                  sh 'terraform validate -var  name=${cluster} --var-file=${TFVARS_FILE_NAME}'
                              }
                          }
@@ -153,8 +168,11 @@ spec:
                    withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: params.docker, usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
                        withCredentials([[$class: 'AmazonWebServicesCredentialsBinding',credentialsId: params.aws,accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY' ]]) {
                            wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']) {
-                               dir ("provisioning") {
-                                  sh 'terraform plan  -var docker_username=$USERNAME -var docker_password=$PASSWORD -var aws_access_key_id=$AWS_ACCESS_KEY_ID  -var aws_secret_access_key=$AWS_SECRET_ACCESS_KEY -var name=$cluster --var-file=${TFVARS_FILE_NAME}  -out=${PLAN_NAME}'
+                               dir ("aws-eks-rds-terraform/provisioning") {
+                                    sh 'terraform plan  -var name=$cluster --var-file=${TFVARS_FILE_NAME}  -out=${PLAN_NAME}'
+                                 }
+                                dir ("terraform-pega-modules") { 
+                                   sh 'terraform plan  -var docker_username=$USERNAME -var docker_password=$PASSWORD -var aws_access_key_id=$AWS_ACCESS_KEY_ID  -var aws_secret_access_key=$AWS_SECRET_ACCESS_KEY -var name=$cluster --var-file=${TFVARS_FILE_NAME}  -out=${PLAN_NAME}'
                                  }
                              }
                          }
