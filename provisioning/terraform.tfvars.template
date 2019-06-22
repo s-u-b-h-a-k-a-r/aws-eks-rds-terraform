@@ -1,3 +1,6 @@
+########################
+# cluster parameters   #
+########################
 region                          = "us-west-2"
 vpc_name                        = "subhakar-demo-cloud"
 vpc_subnet                      = "172.16.0.0/16"
@@ -13,6 +16,9 @@ worker_groups                   = [
         "key_name"              = "subhakarkotta"
 
     }]
+########################
+# database parameters  #
+########################
 rds_name                        = "dev"
 rds_port                        = "5432"
 rds_storage_type                = "gp2"
@@ -23,3 +29,12 @@ rds_instance_class              = "db.m4.xlarge"
 rds_username                    = "postgres"
 rds_password                    = "postgres"
 rds_parameter_group_family      = "postgres9.6"
+
+####################
+# pega parameters  #
+####################
+namespace                       = "pega"
+release_name                    = "pega"
+chart_name                      = "pega"
+chart_version                   = "8.3.0-9"
+repo_url                        = "https://scrumteamwhitewalkers.github.io/pega-helm-charts/"
