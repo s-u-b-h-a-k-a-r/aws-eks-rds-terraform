@@ -154,10 +154,6 @@ spec:
                        withCredentials([[$class: 'AmazonWebServicesCredentialsBinding',credentialsId: params.aws,accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY' ]]) {
                            wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']) {
                                dir ("provisioning") {
-                                  sh 'echo AWS_ACCESS_KEY_ID # ${AWS_ACCESS_KEY_ID}' 
-                                  sh 'echo AWS_SECRET_ACCESS_KEY # ${AWS_SECRET_ACCESS_KEY}' 
-                                  sh 'echo DOCKER_USERNAME # ${USERNAME}' 
-                                  sh 'echo DOCKER_PASSWORD # ${PASSWORD}' 
                                   sh 'terraform plan  -var docker_username=$USERNAME -var docker_password=$PASSWORD -var aws_access_key_id=$AWS_ACCESS_KEY_ID  -var aws_secret_access_key=$AWS_SECRET_ACCESS_KEY -var name=$cluster --var-file=${TFVARS_FILE_NAME}  -out=${PLAN_NAME}'
                                  }
                              }
