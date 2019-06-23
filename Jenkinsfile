@@ -25,11 +25,9 @@ spec:
             choices: ['preview' , 'create' , 'show', 'preview-destroy' , 'destroy' , 'remove-state'],
             description: 'preview - to list the resources being created.  create - creates a new cluster.  show - list the resources of existing cluster.  preview-destroy - list the resources of existing cluster that will be destroyed. destroy - destroys the cluster',
             name: 'action')
-        string(name: 'docker', defaultValue : '<YOUR_DOCKER_CREDENTIAL>', description: "Provide your  docker account configured in global credentials")   
-        string(name: 'aws', defaultValue : '<YOUR_AWS_CREDENTIAL>', description: "Provide your  aws account configured in global credentials")
-        string(name: 'bucket', defaultValue : '<YOUR_BUCKET_NAME>', description: "Existing S3 bucket name to store <.tfstate> file.")
-        string(name: 'region', defaultValue : '<YOUR_REGION>', description: "Region name where the bucket resides.")
-        string(name: 'cluster', defaultValue : '<YOUR_CLUSTER>', description: "Unique EKS Cluster name [non existing cluster in case of new].")
+        string(name: 'docker', defaultValue : 'docker-hub', description: "Provide your  docker account configured in global credentials")   
+        string(name: 'aws', defaultValue : 'kotts1-aws', description: "Provide your  aws account configured in global credentials")
+        string(name: 'cluster', defaultValue : 'subhakar-demo-cloud', description: "Unique EKS Cluster name [non existing cluster in case of new].")
         string(name: 'state', defaultValue : '<YOUR_JSON_PATH>', description: "Provide the json path to remove state")
         text(name: 'parameters', defaultValue : '<YOUR_TERRAFORM_TFVARS>', description: "Provide all the parameters by visiting the below github link https://github.com/SubhakarKotta/aws-eks-rds-terraform/provisioning/terraform.tfvars.template  Make sure you update the values as per your requirements.  Provide unique values for the parameters  AWS_vpc_name|AWS_rds_identifier by appending  (cluster name) E.g.  cluster: {subhakar-demo-cluster}  AWS_vpc_name: {subhakar-demo-cluster-vpc} AWS_rds_identifier : {subhakar-demo-cluster} ")
         text(name: 'pega', defaultValue : '', description: "Provide HELM values.yaml ")
@@ -104,7 +102,7 @@ spec:
                    withCredentials([[$class: 'AmazonWebServicesCredentialsBinding',credentialsId: params.aws,accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY' ]]) {
                        wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']) {
                             dir ("provisioning") { 
-                                sh 'terraform init -backend-config="bucket=${bucket}" -backend-config="key=${cluster}/terraform.tfstate" -backend-config="region=${region}"'
+                                sh 'terraform init  -backend-config="key=${cluster}/terraform.tfstate"'
                                 sh 'terraform output kubeconfig > ./kubeconfig_${cluster} || true'
                             }
                          }
@@ -219,14 +217,17 @@ spec:
             }
             steps {
                 container('jenkins-slave-terraform-kubectl-helm-awscli'){ 
-                     withCredentials([[$class: 'AmazonWebServicesCredentialsBinding',credentialsId: params.aws,accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY' ]]) {
-                         wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']) {
-                              dir ("provisioning") {
-                                   sh 'terraform destroy -var name=${cluster} --var-file=${TFVARS_FILE_NAME} -force'
-                               }
+                     withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: params.docker, usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
+                         withCredentials([[$class: 'AmazonWebServicesCredentialsBinding',credentialsId: params.aws,accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY' ]]) {
+                             wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']) {
+                                 dir ("provisioning") {
+                                     sh 'terraform destroy -var docker_username=$USERNAME -var docker_password=$PASSWORD -var aws_access_key_id=$AWS_ACCESS_KEY_ID  -var aws_secret_access_key=$AWS_SECRET_ACCESS_KEY  -var name=${cluster} --var-file=${TFVARS_FILE_NAME} -force'
+                                     }
+                                 }
+                             }
+                         }  
                      }
-                } 
-             }
+                 }
+            }
          }
-    }
-}
+     }
