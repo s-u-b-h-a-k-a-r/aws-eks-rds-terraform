@@ -38,7 +38,6 @@ variable "rds_username" {}
 variable "rds_password" {}
 variable "rds_parameter_group_family" {}
 
-
 variable "enable_dashboard" {
   default = true
 }
