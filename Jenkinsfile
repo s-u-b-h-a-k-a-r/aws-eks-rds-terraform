@@ -25,7 +25,7 @@ spec:
             choices: ['preview' , 'create' , 'show', 'preview-destroy' , 'destroy' , 'remove-state'],
             description: 'preview - to list the resources being created.  create - creates a new cluster.  show - list the resources of existing cluster.  preview-destroy - list the resources of existing cluster that will be destroyed. destroy - destroys the cluster',
             name: 'action')
-        string(name: 'docker', defaultValue : 'docker-hub', description: "Provide your  docker account configured in global credentials.)   
+        string(name: 'docker', defaultValue : 'docker-hub', description: "Provide your  docker account configured in global credentials.")   
         string(name: 'aws', defaultValue : 'kotts1-aws', description: "Provide your  aws account configured in global credentials.")
         string(name: 'cluster', defaultValue : 'subhakar-demo-cloud', description: "Provide unique EKS Cluster name [non existing cluster in case of new].")
         string(name: 'state', defaultValue : '<YOUR_JSON_PATH>', description: "Provide the json path to remove particular state.")
