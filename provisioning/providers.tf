@@ -18,5 +18,5 @@ provider "template" {
 provider "kubernetes" {
   version          = "~> 1.7"
   load_config_file = true
-  config_path      = "./kubeconfig_${module.db.this_db_instance_id}"
+  config_path      = "./kubeconfig_${module.cluster.cluster_id}"
 }

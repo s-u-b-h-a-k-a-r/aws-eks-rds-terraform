@@ -224,7 +224,6 @@ spec:
                               dir ("provisioning") {
                                    sh 'terraform destroy -var name=${cluster} --var-file=${TFVARS_FILE_NAME} -force'
                                }
-                         }
                      }
                 } 
              }
