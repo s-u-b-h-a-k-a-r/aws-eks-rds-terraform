@@ -12,6 +12,6 @@ module "pega" {
   docker_password       = "${var.docker_password}"
   docker_username       = "${var.docker_username}"
   docker_url            = "https://index.docker.io/v1/"
-  pega_repo_url              = "https://scrumteamwhitewalkers.github.io/pega-helm-charts/"
+  pega_repo_url              = "${var.pega_repo_url}"
   jdbc_url              = "jdbc:postgresql://${module.db.this_db_instance_endpoint}/${module.db.this_db_instance_name}"
 }
