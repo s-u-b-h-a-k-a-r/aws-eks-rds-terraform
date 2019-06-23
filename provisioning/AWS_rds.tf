@@ -33,7 +33,7 @@ module "db" {
   version = "v2.0.0"
   source  = "terraform-aws-modules/rds/aws"
 
-  identifier = "${module.db.this_db_instance_id}"
+  identifier = "${module.cluster.cluster_id}"
 
   engine              = "${var.rds_engine}"
   engine_version      = "${var.rds_engine_version}"
