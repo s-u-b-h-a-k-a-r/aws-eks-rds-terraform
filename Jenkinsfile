@@ -25,11 +25,11 @@ spec:
             choices: ['preview' , 'create' , 'show', 'preview-destroy' , 'destroy' , 'remove-state'],
             description: 'preview - to list the resources being created.  create - creates a new cluster.  show - list the resources of existing cluster.  preview-destroy - list the resources of existing cluster that will be destroyed. destroy - destroys the cluster',
             name: 'action')
-        string(name: 'docker', defaultValue : 'docker-hub', description: "Provide your  docker account configured in global credentials")   
-        string(name: 'aws', defaultValue : 'kotts1-aws', description: "Provide your  aws account configured in global credentials")
-        string(name: 'cluster', defaultValue : 'subhakar-demo-cloud', description: "Unique EKS Cluster name [non existing cluster in case of new].")
-        string(name: 'state', defaultValue : '<YOUR_JSON_PATH>', description: "Provide the json path to remove state")
-        text(name: 'parameters', defaultValue : '<YOUR_TERRAFORM_TFVARS>', description: "Provide all the parameters by visiting the below github link https://github.com/SubhakarKotta/aws-eks-rds-terraform/provisioning/terraform.tfvars.template  Make sure you update the values as per your requirements.  Provide unique values for the parameters  AWS_vpc_name|AWS_rds_identifier by appending  (cluster name) E.g.  cluster: {subhakar-demo-cluster}  AWS_vpc_name: {subhakar-demo-cluster-vpc} AWS_rds_identifier : {subhakar-demo-cluster} ")
+        string(name: 'docker', defaultValue : 'docker-hub', description: "Provide your  docker account configured in global credentials.)   
+        string(name: 'aws', defaultValue : 'kotts1-aws', description: "Provide your  aws account configured in global credentials.")
+        string(name: 'cluster', defaultValue : 'subhakar-demo-cloud', description: "Provide unique EKS Cluster name [non existing cluster in case of new].")
+        string(name: 'state', defaultValue : '<YOUR_JSON_PATH>', description: "Provide the json path to remove particular state.")
+        text(name: 'parameters', defaultValue : '<YOUR_TERRAFORM_TFVARS>', description: "Provide all the parameters by visiting the below github link https://github.com/SubhakarKotta/aws-eks-rds-terraform/provisioning/terraform.tfvars.template.  Make sure you update the values as per your requirements.")
         text(name: 'pega', defaultValue : '', description: "Provide HELM values.yaml ")
     }
 

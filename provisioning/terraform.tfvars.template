@@ -1,12 +1,11 @@
-########################
-# cluster parameters   #
-########################
+#######################################################################################
+# cluster parameters. The VPC name and RDS name will be created with the cluster name #
+#######################################################################################
 region                          = "us-west-2"
-vpc_name                        = "subhakar-demo-cloud"
 vpc_subnet                      = "172.16.0.0/16"
 azs                             = ["us-west-2a", "us-west-2b"]
 public_subnets                  = ["172.16.0.0/20", "172.16.16.0/20"]
-tags                            = { "Environment" = "Testing" }
+tags                            = { "Environment" = "Development" }
 worker_groups                   = [
     {
         "instance_type"         = "m4.xlarge"
@@ -37,4 +36,4 @@ namespace                       = "pega"
 release_name                    = "pega"
 chart_name                      = "pega"
 chart_version                   = "8.3.0-9"
-pega_repo_url                        = "https://scrumteamwhitewalkers.github.io/pega-helm-charts/"
+pega_repo_url                   = "https://scrumteamwhitewalkers.github.io/pega-helm-charts/"
