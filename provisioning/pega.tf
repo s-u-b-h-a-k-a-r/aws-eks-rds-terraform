@@ -18,5 +18,5 @@ module "pega" {
 }
 
 locals {
-  id = "${md5(join(";", list(module.cluster.cluster_id, module.db.id)))}"
+  id = "${md5(join(";", list(module.cluster.cluster_id, module.db.this_db_instance_endpoint)))}"
 }
