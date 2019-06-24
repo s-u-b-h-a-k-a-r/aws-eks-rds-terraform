@@ -15,9 +15,8 @@ provider "template" {
   version = "~> 2.1"
 }
 
-/*
 provider "kubernetes" {
   version          = "~> 1.7"
   load_config_file = true
   config_path      = "./kubeconfig_${module.cluster.cluster_id}"
-}*/
+}
