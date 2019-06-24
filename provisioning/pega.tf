@@ -2,7 +2,7 @@ module "pega" {
   kubernetes_provider   = "eks"
   source                = "github.com/scrumteamwhitewalkers/terraform-pega-modules.git"
   name                  = "${module.cluster.cluster_id}"
-  wait_id               = "${kubernetes_cluster_role_binding.super-user.id}"
+  wait_id               = "${local.id}"
   namespace             = "${var.namespace}"
   release_name          = "${var.release_name}"
   chart_name            = "${var.chart_name}"
@@ -15,4 +15,8 @@ module "pega" {
   docker_url            = "https://index.docker.io/v1/"
   pega_repo_url         = "${var.pega_repo_url}"
   jdbc_url              = "jdbc:postgresql://${module.db.this_db_instance_endpoint}/${module.db.this_db_instance_name}"
+}
+
+locals {
+  id = "${md5(join(";", list(module.cluster.cluster_id, module.db.id)))}"
 }
