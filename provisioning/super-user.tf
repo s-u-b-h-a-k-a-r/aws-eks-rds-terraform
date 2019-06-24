@@ -1,4 +1,4 @@
-resource "kubernetes_service_account" "super-user" {
+/*resource "kubernetes_service_account" "super-user" {
   metadata {
     name      = "super-user"
     namespace = "kube-system"
@@ -26,4 +26,4 @@ resource "kubernetes_cluster_role_binding" "super-user" {
   }
 
   depends_on = ["kubernetes_service_account.super-user"]
-}
+}*/
