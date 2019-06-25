@@ -188,10 +188,10 @@ output "db_subnet_group_id" {
 output "elb_ho" {
   value = "jdbc:postgresql://${module.db.this_db_instance_endpoint}/${module.db.this_db_instance_name}"
 }
-
+/*
 output "elb_hostname" {
   value = "${module.pega.elb_hostname}"
 }
 output "elb_hostname_error" {
   value = "${module.pega.elb_hostname_error}"
-}
+}*/
