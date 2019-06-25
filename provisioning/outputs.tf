@@ -185,7 +185,7 @@ output "db_subnet_group_id" {
   value = "${module.db.this_db_subnet_group_id}"
 }
 
-output "elb_ho" {
+output "jdbc_url" {
   value = "jdbc:postgresql://${module.db.this_db_instance_endpoint}/${module.db.this_db_instance_name}"
 }
 /*
