@@ -16,7 +16,6 @@ spec:
     }
   }
     options {
-        disableConcurrentBuilds()
         timeout(time: 2, unit: 'HOURS')
         ansiColor('xterm')
     }
