@@ -14,5 +14,6 @@ module "pega" {
   docker_username       = "${var.docker_username}"
   docker_url            = "https://index.docker.io/v1/"
   pega_repo_url         = "${var.pega_repo_url}"
+  route53_zone           = "${var.route53_zone}"
   jdbc_url              = "jdbc:postgresql://${module.db.this_db_instance_endpoint}/${module.db.this_db_instance_name}"
 }
