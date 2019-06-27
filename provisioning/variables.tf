@@ -118,6 +118,6 @@ variable "route53_zone" {
 }
 
 variable "elb_zone_id" {
-  default = "dev.pega.io"
+  default = "Z1H1FL5HABSF5"
 }
 
