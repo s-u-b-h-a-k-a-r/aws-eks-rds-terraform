@@ -113,11 +113,11 @@ variable "pega_repo_url" {
   default = "https://scrumteamwhitewalkers.github.io/pega-helm-charts/"
 }
 
-variable "route53_zone"{
+variable "route53_zone" {
   default = "dev.pega.io"
 }
 
-variable "elb_zone_id"{
+variable "elb_zone_id" {
   default = "dev.pega.io"
 }
 
