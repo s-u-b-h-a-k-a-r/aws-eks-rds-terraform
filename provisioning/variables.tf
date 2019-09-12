@@ -87,37 +87,3 @@ variable "rds_parameter_group_family" {
 variable "enable_dashboard" {
   default = true
 }
-
-###################ADDONS VARIABLES##################
-variable "docker_username" {}
-
-variable "docker_password" {}
-
-variable "namespace" {
-  default = "pega"
-}
-
-variable "release_name" {
-  default = "pega"
-}
-
-variable "chart_name" {
-  default = "pega"
-}
-
-variable "chart_version" {
-  default = "8.3.0-9"
-}
-
-variable "pega_repo_url" {
-  default = "https://scrumteamwhitewalkers.github.io/pega-helm-charts/"
-}
-
-variable "route53_zone" {
-  default = "dev.pega.io"
-}
-
-variable "elb_zone_id" {
-  default = "Z1H1FL5HABSF5"
-}
-
